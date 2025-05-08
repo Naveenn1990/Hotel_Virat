@@ -10,5 +10,5 @@ router.get("/stats", orderController.getOrderStats)
 router.get("/number/:orderNumber", orderController.getOrderByNumber)
 router.get("/:id", orderController.getOrderById)
 router.put("/:id/status", orderController.updateOrderStatus)
-
+router.get("/", orderController.getAllOrders);
 module.exports = router

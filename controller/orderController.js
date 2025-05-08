@@ -296,3 +296,102 @@ exports.getOrderStats = async (req, res) => {
     res.status(500).json({ message: "Error fetching order statistics", error: error.message });
   }
 };
+
+
+
+
+
+
+
+// Get all orders (admin only)
+exports.getAllOrders = async (req, res) => {
+  try {
+    // Extract query parameters
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      branchId,
+      userId,
+      fromDate,
+      toDate,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      search = "", // Add search parameter
+    } = req.query
+
+    // Build the query object
+    const query = {}
+
+    if (status) {
+      query.status = status
+    }
+
+    if (branchId) {
+      if (!mongoose.Types.ObjectId.isValid(branchId)) {
+        return res.status(400).json({ message: "Invalid Branch ID format" })
+      }
+      query.branchId = branchId
+    }
+
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Invalid User ID format" })
+      }
+      query.userId = userId
+    }
+
+    // Date range filter
+    if (fromDate || toDate) {
+      query.createdAt = {}
+      if (fromDate) {
+        query.createdAt.$gte = new Date(fromDate)
+      }
+      if (toDate) {
+        query.createdAt.$lte = new Date(toDate)
+      }
+    }
+
+    // Add search functionality
+    if (search && search.trim() !== "") {
+      // Create a search regex for case-insensitive search
+      const searchRegex = new RegExp(search.trim(), "i")
+
+      // Search in multiple fields using $or operator
+      query.$or = [{ orderNumber: searchRegex }, { name: searchRegex }, { phone: searchRegex }, { email: searchRegex }]
+    }
+
+    // Sort options
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1
+
+    // Execute query with pagination
+    const orders = await Order.find(query)
+      .populate("branchId", "name address")
+      .populate("userId", "name email mobile")
+      .sort(sortOptions)
+      .limit(Number.parseInt(limit))
+      .skip((Number.parseInt(page) - 1) * Number.parseInt(limit))
+
+    // Get total count for pagination info
+    const total = await Order.countDocuments(query)
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+      pagination: {
+        page: Number.parseInt(page),
+        limit: Number.parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    })
+  } catch (error) {
+    console.error("Error in getAllOrders:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: error.message,
+    })
+  }
+}

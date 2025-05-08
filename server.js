@@ -79,6 +79,7 @@ const aboutUsRoutes = require("./routes/aboutUsRoutes");
 const helpSupportRoutes = require("./routes/helpSupportRoutes");
 const termsRoutes = require("./routes/termsRoutes");
 const addressRoutes =require("./routes/addressRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -91,6 +92,7 @@ app.use("/hotel/about-us", aboutUsRoutes);
 app.use("/hotel/help-support", helpSupportRoutes);
 app.use("/hotel/terms", termsRoutes);
 app.use("/hotel/address", addressRoutes);
+app.use("/hotel/admin-auth", adminRoutes)
 
 // Define Port
 const PORT = process.env.PORT || 5000;
