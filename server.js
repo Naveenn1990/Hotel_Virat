@@ -80,6 +80,17 @@ const helpSupportRoutes = require("./routes/helpSupportRoutes");
 const termsRoutes = require("./routes/termsRoutes");
 const addressRoutes =require("./routes/addressRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const counterLoginRoutes = require("./routes/counterLoginRoutes");
+const customerDetailsRoutes = require("./routes/customerDetailsRoutes");
+const counterInvoiceRoutes = require("./routes/counterInvoiceRoutes");
+const staffLoginRoutes = require("./routes/staffLoginRoutes");
+const tableRoutes = require("./routes/tableRoutes");
+const peopleSelectionRoutes = require("./routes/peopleSelectionRoutes");
+const staffOrderRoutes = require("./routes/staffOrderRoutes");
+
+const counterOrderRoutes = require("./routes/counterOrderRoutes");
+const counterBillRoutes = require("./routes/counterBillRoutes");
+const staffInvoiceRoutes =require("./routes/staffInvoiceRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -93,7 +104,16 @@ app.use("/hotel/help-support", helpSupportRoutes);
 app.use("/hotel/terms", termsRoutes);
 app.use("/hotel/address", addressRoutes);
 app.use("/hotel/admin-auth", adminRoutes)
-
+app.use("/hotel/counter-auth", counterLoginRoutes);
+app.use("/hotel/customer-details", customerDetailsRoutes);
+app.use("/hotel/counter-invoice", counterInvoiceRoutes);
+app.use("/hotel/staff-auth", staffLoginRoutes)
+app.use("/hotel/table", tableRoutes)
+app.use("/hotel/people-selection", peopleSelectionRoutes);
+app.use("/hotel/staff-order", staffOrderRoutes);
+app.use("/hotel/counter-order", counterOrderRoutes);
+app.use("/hotel/counter-bill", counterBillRoutes);
+app.use("/hotel/staff-invoice", staffInvoiceRoutes);
 // Define Port
 const PORT = process.env.PORT || 5000;
 

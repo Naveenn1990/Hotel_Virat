@@ -11,6 +11,11 @@ const branchSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  image: {
+    type: String,
+    required: false,
+    trim: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
