@@ -1,14 +1,21 @@
-const express = require('express');
-const router = express.Router();
-const staffLoginController = require('../controller/staffLoginController');
+const express = require("express")
+const router = express.Router()
+const staffLoginController = require("../controller/staffLoginController")
 
-// Staff Registration Routes
-router.post('/register/send-otp', staffLoginController.sendOtpForStaffRegistration);
-router.post('/register/resend-otp', staffLoginController.resendOtpForStaffRegistration);
+// CRUD Routes for Staff Management
+router.get("/", staffLoginController.getAllStaff)
+router.get("/:id", staffLoginController.getStaffById)
+router.post("/register", staffLoginController.registerStaffDirect)
+router.put("/:id", staffLoginController.updateStaff)
+router.delete("/:id", staffLoginController.deleteStaff)
 
-// Staff Login Routes
-router.post('/login/send-otp', staffLoginController.sendOtpForStaffLogin);
-router.post('/verify-otp', staffLoginController.verifyOtpForStaff);
-router.post('/login/resend-otp', staffLoginController.resendOtpForStaffLogin);
+// OTP-based Registration Routes
+router.post("/register/send-otp", staffLoginController.sendOtpForStaffRegistration)
+router.post("/register/resend-otp", staffLoginController.resendOtpForStaffRegistration)
 
-module.exports = router;
+// OTP-based Login Routes
+router.post("/login/send-otp", staffLoginController.sendOtpForStaffLogin)
+router.post("/verify-otp", staffLoginController.verifyOtpForStaff)
+router.post("/login/resend-otp", staffLoginController.resendOtpForStaffLogin)
+
+module.exports = router
