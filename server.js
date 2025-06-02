@@ -90,7 +90,8 @@ const staffOrderRoutes = require("./routes/staffOrderRoutes");
 const counterOrderRoutes = require("./routes/counterOrderRoutes");
 const counterBillRoutes = require("./routes/counterBillRoutes");
 const staffInvoiceRoutes = require("./routes/staffInvoiceRoutes");
-const recipeRoutes = require("./routes/recipeRoutes"); // <-- Recipe routes import
+const recipeRoutes = require("./routes/recipeRoutes"); 
+const customerRoutes = require("./routes/customerRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -115,7 +116,8 @@ app.use("/hotel/counter-order", counterOrderRoutes);
 app.use("/hotel/counter-bill", counterBillRoutes);
 app.use("/hotel/staff-invoice", staffInvoiceRoutes);
 
-app.use("/hotel/recipes", recipeRoutes); // <-- Recipe routes usage
+app.use("/hotel/recipes", recipeRoutes); 
+app.use("/hotel/customer", customerRoutes);
 
 // Define Port
 const PORT = process.env.PORT || 5000;
