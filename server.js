@@ -93,6 +93,9 @@ const counterBillRoutes = require("./routes/counterBillRoutes");
 const staffInvoiceRoutes = require("./routes/staffInvoiceRoutes");
 const recipeRoutes = require("./routes/recipeRoutes"); 
 const customerRoutes = require("./routes/customerRoutes");
+const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
+const storeLocationRoutes = require("./routes/storeLocationRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -119,6 +122,9 @@ app.use("/hotel/staff-invoice", staffInvoiceRoutes);
 
 app.use("/hotel/recipes", recipeRoutes); 
 app.use("/hotel/customer", customerRoutes);
+app.use("/hotel/raw-materials", rawMaterialRoutes)
+app.use("/hotel/store-locations", storeLocationRoutes)
+app.use("/hotel/reservation", reservationRoutes);
 
 // Example axios request
 axios.get("http://localhost:5000/hotel/branch")
