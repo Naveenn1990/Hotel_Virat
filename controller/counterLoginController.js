@@ -23,7 +23,7 @@ exports.sendOtpForCounterRegistration = async (req, res) => {
     }
 
     const otp = generateOtp();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
     counter = new Counter({
       name,
@@ -56,7 +56,7 @@ exports.sendOtpForCounterLogin = async (req, res) => {
     }
 
     const otp = generateOtp();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); 
 
     counter.otp = otp;
     counter.otpExpires = otpExpires;
