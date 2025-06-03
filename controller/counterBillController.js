@@ -6,8 +6,8 @@ const Menu = require("../model/menuModel")
 const Counter = require("../model/counterLoginModel")
 const asyncHandler = require("express-async-handler")
 
-const VALID_TAX_RATE = 0.05 // 5%
-const VALID_SERVICE_CHARGE_RATE = 0.1 // 10%
+const TAX_RATE = 0.05 // 5%
+const SERVICE_CHARGE_RATE = 0.1 // 10%
 
 exports.createCounterBill = asyncHandler(async (req, res) => {
   const {
@@ -19,11 +19,10 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
     phoneNumber,
     items,
     subtotal,
-    taxRate,
-    taxAmount,
-    serviceChargeRate,
-    serviceChargeAmount,
+    tax,
+    serviceCharge,
     totalAmount,
+    grandTotal,
     date,
     time,
   } = req.body
@@ -44,19 +43,11 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
     throw new Error("Items array is required and must not be empty")
   }
 
-  if (subtotal <= 0 || taxAmount < 0 || serviceChargeAmount < 0 || totalAmount <= 0) {
+  if (subtotal <= 0 || tax < 0 || serviceCharge < 0 || totalAmount <= 0 || grandTotal <= 0) {
     res.status(400)
-    throw new Error("Subtotal and total amount must be greater than zero; tax and service charge cannot be negative")
-  }
-
-  if (taxRate !== VALID_TAX_RATE) {
-    res.status(400)
-    throw new Error(`Tax rate must be ${VALID_TAX_RATE * 100}%`)
-  }
-
-  if (serviceChargeRate !== VALID_SERVICE_CHARGE_RATE) {
-    res.status(400)
-    throw new Error(`Service charge rate must be ${VALID_SERVICE_CHARGE_RATE * 100}%`)
+    throw new Error(
+      "Subtotal, total amount and grand total must be greater than zero; tax and service charge cannot be negative",
+    )
   }
 
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
@@ -144,23 +135,50 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
     }
   }
 
-  const calculatedTaxAmount = subtotal * taxRate
-  const calculatedServiceChargeAmount = subtotal * serviceChargeRate
-  const calculatedTotal = subtotal + calculatedTaxAmount + calculatedServiceChargeAmount
-
-  if (Math.abs(taxAmount - calculatedTaxAmount) > 0.01) {
+  // Validate calculations against counter order (using same field names as staff order)
+  if (Math.abs(subtotal - counterOrder.subtotal) > 0.01) {
     res.status(400)
-    throw new Error("Tax amount calculation mismatch")
+    throw new Error("Subtotal mismatch with counter order")
   }
 
-  if (Math.abs(serviceChargeAmount - calculatedServiceChargeAmount) > 0.01) {
+  if (Math.abs(tax - counterOrder.tax) > 0.01) {
     res.status(400)
-    throw new Error("Service charge amount calculation mismatch")
+    throw new Error("Tax mismatch with counter order")
   }
 
-  if (Math.abs(totalAmount - calculatedTotal) > 0.01) {
+  if (Math.abs(serviceCharge - counterOrder.serviceCharge) > 0.01) {
     res.status(400)
-    throw new Error("Total amount calculation mismatch")
+    throw new Error("Service charge mismatch with counter order")
+  }
+
+  if (Math.abs(totalAmount - counterOrder.totalAmount) > 0.01) {
+    res.status(400)
+    throw new Error("Total amount mismatch with counter order")
+  }
+
+  if (Math.abs(grandTotal - counterOrder.grandTotal) > 0.01) {
+    res.status(400)
+    throw new Error("Grand total mismatch with counter order")
+  }
+
+  // Additional validation for calculation consistency
+  const calculatedTax = subtotal * TAX_RATE
+  const calculatedServiceCharge = subtotal * SERVICE_CHARGE_RATE
+  const calculatedGrandTotal = subtotal + calculatedTax + calculatedServiceCharge
+
+  if (Math.abs(tax - calculatedTax) > 0.01) {
+    res.status(400)
+    throw new Error("Tax calculation mismatch")
+  }
+
+  if (Math.abs(serviceCharge - calculatedServiceCharge) > 0.01) {
+    res.status(400)
+    throw new Error("Service charge calculation mismatch")
+  }
+
+  if (Math.abs(grandTotal - calculatedGrandTotal) > 0.01) {
+    res.status(400)
+    throw new Error("Grand total calculation mismatch")
   }
 
   // Create bill
@@ -173,11 +191,10 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
     phoneNumber,
     items,
     subtotal,
-    taxRate,
-    taxAmount,
-    serviceChargeRate,
-    serviceChargeAmount,
+    tax,
+    serviceCharge,
     totalAmount,
+    grandTotal,
     date,
     time,
   })
@@ -186,7 +203,7 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
 
   const populatedBill = await CounterBill.findById(counterBill._id)
     .populate("userId", "name mobile")
-    .populate("order", "items totalAmount paymentMethod")
+    .populate("order", "items subtotal tax serviceCharge totalAmount grandTotal paymentMethod")
     .populate("branch", "name address")
     .populate("invoice", "invoiceNumber")
     .populate("items.menuItemId", "name")
@@ -208,7 +225,11 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
       order: {
         id: populatedBill.order._id,
         items: populatedBill.order.items,
+        subtotal: populatedBill.order.subtotal,
+        tax: populatedBill.order.tax,
+        serviceCharge: populatedBill.order.serviceCharge,
         totalAmount: populatedBill.order.totalAmount,
+        grandTotal: populatedBill.order.grandTotal,
         paymentMethod: populatedBill.order.paymentMethod,
       },
       invoice: {
@@ -224,11 +245,10 @@ exports.createCounterBill = asyncHandler(async (req, res) => {
       phoneNumber: populatedBill.phoneNumber,
       items: populatedBill.items,
       subtotal: populatedBill.subtotal,
-      taxRate: populatedBill.taxRate,
-      taxAmount: populatedBill.taxAmount,
-      serviceChargeRate: populatedBill.serviceChargeRate,
-      serviceChargeAmount: populatedBill.serviceChargeAmount,
+      tax: populatedBill.tax,
+      serviceCharge: populatedBill.serviceCharge,
       totalAmount: populatedBill.totalAmount,
+      grandTotal: populatedBill.grandTotal,
       date: populatedBill.date,
       time: populatedBill.time,
       createdAt: populatedBill.createdAt,
@@ -247,7 +267,7 @@ exports.getCounterBillById = asyncHandler(async (req, res) => {
 
   const counterBill = await CounterBill.findById(id)
     .populate("userId", "name mobile")
-    .populate("order", "items totalAmount paymentMethod")
+    .populate("order", "items subtotal tax serviceCharge totalAmount grandTotal paymentMethod")
     .populate("branch", "name address")
     .populate("invoice", "invoiceNumber")
     .populate("items.menuItemId", "name")
@@ -273,7 +293,11 @@ exports.getCounterBillById = asyncHandler(async (req, res) => {
       order: {
         id: counterBill.order._id,
         items: counterBill.order.items,
+        subtotal: counterBill.order.subtotal,
+        tax: counterBill.order.tax,
+        serviceCharge: counterBill.order.serviceCharge,
         totalAmount: counterBill.order.totalAmount,
+        grandTotal: counterBill.order.grandTotal,
         paymentMethod: counterBill.order.paymentMethod,
       },
       invoice: {
@@ -289,11 +313,10 @@ exports.getCounterBillById = asyncHandler(async (req, res) => {
       phoneNumber: counterBill.phoneNumber,
       items: counterBill.items,
       subtotal: counterBill.subtotal,
-      taxRate: counterBill.taxRate,
-      taxAmount: counterBill.taxAmount,
-      serviceChargeRate: counterBill.serviceChargeRate,
-      serviceChargeAmount: counterBill.serviceChargeAmount,
+      tax: counterBill.tax,
+      serviceCharge: counterBill.serviceCharge,
       totalAmount: counterBill.totalAmount,
+      grandTotal: counterBill.grandTotal,
       date: counterBill.date,
       time: counterBill.time,
       createdAt: counterBill.createdAt,
@@ -314,7 +337,7 @@ exports.listCounterBills = asyncHandler(async (req, res) => {
 
   const counterBills = await CounterBill.find(query)
     .populate("userId", "name mobile")
-    .populate("order", "items totalAmount paymentMethod")
+    .populate("order", "items subtotal tax serviceCharge totalAmount grandTotal paymentMethod")
     .populate("branch", "name address")
     .populate("invoice", "invoiceNumber")
     .populate("items.menuItemId", "name")
@@ -339,7 +362,11 @@ exports.listCounterBills = asyncHandler(async (req, res) => {
         order: {
           id: bill.order._id,
           items: bill.order.items || [],
+          subtotal: bill.order.subtotal,
+          tax: bill.order.tax,
+          serviceCharge: bill.order.serviceCharge,
           totalAmount: bill.order.totalAmount,
+          grandTotal: bill.order.grandTotal,
           paymentMethod: bill.order.paymentMethod,
         },
         invoice: {
@@ -355,11 +382,10 @@ exports.listCounterBills = asyncHandler(async (req, res) => {
         phoneNumber: bill.phoneNumber,
         items: bill.items || [],
         subtotal: bill.subtotal,
-        taxRate: bill.taxRate,
-        taxAmount: bill.taxAmount,
-        serviceChargeRate: bill.serviceChargeRate,
-        serviceChargeAmount: bill.serviceChargeAmount,
+        tax: bill.tax,
+        serviceCharge: bill.serviceCharge,
         totalAmount: bill.totalAmount,
+        grandTotal: bill.grandTotal,
         date: bill.date,
         time: bill.time,
         createdAt: bill.createdAt,

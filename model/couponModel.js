@@ -60,7 +60,7 @@ const couponSchema = new mongoose.Schema(
     applicableCategories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Categoryy",
+        ref: "Categoryy", 
       },
     ],
     applicableMenuItems: [
@@ -87,7 +87,7 @@ const couponSchema = new mongoose.Schema(
     ],
     image: {
       type: String,
-      default: null, // Store the file path of the coupon image
+      default: null, 
     },
   },
   {
@@ -95,7 +95,7 @@ const couponSchema = new mongoose.Schema(
   }
 );
 
-// Method to check if coupon is valid
+
 couponSchema.methods.isValid = function (orderValue, userId, branchId) {
   const now = new Date();
 
