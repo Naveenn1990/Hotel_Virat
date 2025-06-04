@@ -118,7 +118,7 @@ app.use("/hotel/staff-order", staffOrderRoutes);
 app.use("/hotel/counter-order", counterOrderRoutes);
 app.use("/hotel/counter-bill", counterBillRoutes);
 app.use("/hotel/staff-invoice", staffInvoiceRoutes);
-
+app.use("/hotel/raw-materials", rawMaterialRoutes)
 app.use("/hotel/recipes", recipeRoutes); 
 app.use("/hotel/customer", customerRoutes);
 app.use("/hotel/raw-materials", rawMaterialRoutes)
