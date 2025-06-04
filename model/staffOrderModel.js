@@ -99,6 +99,11 @@ const staffOrderSchema = new mongoose.Schema(
       enum: ["card", "upi", "netbanking", "cash", "wallet"],
       required: true,
     },
+    // NEW FIELD ADDED - to track when payment was last updated
+    paymentUpdatedAt: {
+      type: Date,
+      default: Date.now,
+    },
     orderTime: {
       type: Date,
       required: true,
@@ -119,6 +124,7 @@ staffOrderSchema.index({ orderId: 1 })
 staffOrderSchema.index({ branchId: 1, tableId: 1 })
 staffOrderSchema.index({ branchName: 1, tableNumber: 1 })
 staffOrderSchema.index({ status: 1 })
-staffOrderSchema.index({ paymentStatus: 1 })
+staffOrderSchema.index({ paymentStatus: 1 }) // NEW INDEX ADDED
+staffOrderSchema.index({ paymentMethod: 1 }) // NEW INDEX ADDED
 
 module.exports = mongoose.model("StaffOrder", staffOrderSchema)
