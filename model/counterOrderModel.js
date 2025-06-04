@@ -91,7 +91,7 @@ const counterOrderSchema = new mongoose.Schema({
   paymentStatus: {
     type: String,
     required: [true, "Payment status is required"],
-    enum: ["pending", "completed", "failed"],
+    enum: ["pending", "completed", "failed", "refunded"],
     default: "pending",
   },
   cancellationReason: {

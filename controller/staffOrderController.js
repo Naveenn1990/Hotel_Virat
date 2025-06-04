@@ -212,7 +212,7 @@ exports.getOrdersByUserId = async (req, res) => {
 // Get all staff orders (existing function)
 exports.getAllStaffOrders = async (req, res) => {
   try {
-    const { branchId, branchName, tableId, tableNumber, status, paymentStatus, userId } = req.query
+    const { branchId, branchName, tableId, tableNumber, status, paymentStatus, userId, search } = req.query
 
     // Build filter based on query parameters
     const filter = {}
@@ -223,6 +223,12 @@ exports.getAllStaffOrders = async (req, res) => {
     if (status) filter.status = status
     if (paymentStatus) filter.paymentStatus = paymentStatus
     if (userId) filter.userId = userId
+
+    // Add search functionality
+    if (search) {
+      const searchRegex = new RegExp(search, "i")
+      filter.$or = [{ orderId: searchRegex }, { tableNumber: searchRegex }, { branchName: searchRegex }]
+    }
 
     const staffOrders = await StaffOrder.find(filter)
       .populate("branchId", "name address")
@@ -307,14 +313,38 @@ exports.getStaffOrderByOrderId = async (req, res) => {
   }
 }
 
-// Update a staff order status
+// Update a staff order status (UPDATED to include payment status)
 exports.updateStaffOrderStatus = async (req, res) => {
   try {
-    const { status, notes } = req.body
+    const { status, paymentStatus, paymentMethod, notes } = req.body
 
     const updateData = {}
     if (status) updateData.status = status
+    if (paymentStatus) updateData.paymentStatus = paymentStatus
+    if (paymentMethod) updateData.paymentMethod = paymentMethod
     if (notes !== undefined) updateData.notes = notes
+
+    // Validate payment status if provided
+    if (paymentStatus) {
+      const validPaymentStatuses = ["pending", "completed", "failed", "refunded"]
+      if (!validPaymentStatuses.includes(paymentStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid payment status",
+        })
+      }
+    }
+
+    // Validate payment method if provided
+    if (paymentMethod) {
+      const validPaymentMethods = ["card", "upi", "netbanking", "cash", "wallet"]
+      if (!validPaymentMethods.includes(paymentMethod)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid payment method",
+        })
+      }
+    }
 
     const staffOrder = await StaffOrder.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -333,7 +363,7 @@ exports.updateStaffOrderStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Order status updated successfully",
+      message: "Order updated successfully",
       order: staffOrder,
     })
   } catch (error) {

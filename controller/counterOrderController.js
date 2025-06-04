@@ -557,9 +557,9 @@ exports.updateCounterPaymentStatus = asyncHandler(async (req, res) => {
     throw new Error("Invalid order ID format")
   }
 
-  if (!paymentStatus || !["pending", "completed", "failed"].includes(paymentStatus)) {
+  if (!paymentStatus || !["pending", "completed", "failed", "refunded"].includes(paymentStatus)) {
     res.status(400)
-    throw new Error("Invalid payment status. Must be one of: pending, completed, failed")
+    throw new Error("Invalid payment status. Must be one of: pending, completed, failed, refunded")
   }
 
   const counterOrder = await CounterOrder.findById(id)

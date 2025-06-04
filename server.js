@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -27,13 +28,10 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again after 15 minutes"
 });
 
-// Apply the rate limiter to all requests
 app.use(limiter);
 
 // Use morgan for logging
-app.use(morgan('dev'));
-
-// Use Helmet for added security headers
+app.use(morgan('dev'));          
 app.use(helmet({
     contentSecurityPolicy: {
         useDefaults: true,
@@ -92,12 +90,19 @@ const counterBillRoutes = require("./routes/counterBillRoutes");
 const staffInvoiceRoutes = require("./routes/staffInvoiceRoutes");
 const recipeRoutes = require("./routes/recipeRoutes"); 
 const customerRoutes = require("./routes/customerRoutes");
+<<<<<<< HEAD
 const supplierRoutes = require("./routes/supplierRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
 const RawMaterial = require("./routes/rawMaterialRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
+=======
+const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
+const storeLocationRoutes = require("./routes/storeLocationRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
+>>>>>>> 2d950277631ad48dc9fce3c8d5e8ff537f80056a
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -121,6 +126,7 @@ app.use("/hotel/staff-order", staffOrderRoutes);
 app.use("/hotel/counter-order", counterOrderRoutes);
 app.use("/hotel/counter-bill", counterBillRoutes);
 app.use("/hotel/staff-invoice", staffInvoiceRoutes);
+<<<<<<< HEAD
 // app.use("/hotel/raw-materials",RawMaterial)
 app.use("/hotel/recipes", recipeRoutes); 
 app.use("/hotel/customer", customerRoutes);
@@ -128,6 +134,20 @@ app.use("/hotel/supplier", supplierRoutes);
 app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
+=======
+app.use("/hotel/raw-materials", rawMaterialRoutes)
+app.use("/hotel/recipes", recipeRoutes); 
+app.use("/hotel/customer", customerRoutes);
+app.use("/hotel/raw-materials", rawMaterialRoutes)
+app.use("/hotel/store-locations", storeLocationRoutes)
+app.use("/hotel/reservation", reservationRoutes);
+app.use("/hotel/expense", expenseRoutes);
+
+// Example axios request
+axios.get("http://localhost:5000/hotel/branch")
+  .then(res => { /* handle response */ })
+  .catch(err => { /* handle error */ });
+>>>>>>> 2d950277631ad48dc9fce3c8d5e8ff537f80056a
 
 // Define Port
 const PORT = process.env.PORT || 5000;
