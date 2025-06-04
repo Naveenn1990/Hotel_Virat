@@ -28,7 +28,6 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again after 15 minutes"
 });
 
-// Apply the rate limiter to all requests
 app.use(limiter);
 
 // Use morgan for logging
