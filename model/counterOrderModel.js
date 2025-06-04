@@ -52,10 +52,30 @@ const counterOrderSchema = new mongoose.Schema({
     required: [true, "Invoice is required"],
   },
   items: [cOrderItemSchema],
+  subtotal: {
+    type: Number,
+    required: true,
+    min: [0, "Subtotal cannot be negative"],
+  },
+  tax: {
+    type: Number,
+    required: true,
+    min: [0, "Tax cannot be negative"],
+  },
+  serviceCharge: {
+    type: Number,
+    required: true,
+    min: [0, "Service charge cannot be negative"],
+  },
   totalAmount: {
     type: Number,
-    required: [true, "Total amount is required"],
+    required: true,
     min: [0, "Total amount cannot be negative"],
+  },
+  grandTotal: {
+    type: Number,
+    required: true,
+    min: [0, "Grand total cannot be negative"],
   },
   paymentMethod: {
     type: String,

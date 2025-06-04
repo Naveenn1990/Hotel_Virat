@@ -5,8 +5,27 @@ const Menu = require("../model/menuModel")
 const Counter = require("../model/counterLoginModel")
 const asyncHandler = require("express-async-handler")
 
+// Tax and service charge rates (same as staff order)
+const TAX_RATE = 0.05 // 5%
+const SERVICE_CHARGE_RATE = 0.1 // 10%
+
 exports.createCounterOrder = asyncHandler(async (req, res) => {
-  const { userId, customerName, phoneNumber, branchId, invoiceId, items, totalAmount, paymentMethod, status } = req.body
+  const {
+    userId,
+    customerName,
+    phoneNumber,
+    branchId,
+    invoiceId,
+    items,
+    paymentMethod,
+    status,
+    // Optional: allow frontend to send these, but we'll calculate them
+    subtotal: providedSubtotal,
+    tax: providedTax,
+    serviceCharge: providedServiceCharge,
+    totalAmount: providedTotalAmount,
+    grandTotal: providedGrandTotal,
+  } = req.body
 
   // Validate input
   if (!userId) {
@@ -39,11 +58,6 @@ exports.createCounterOrder = asyncHandler(async (req, res) => {
     throw new Error("Items are required")
   }
 
-  if (!totalAmount || totalAmount <= 0) {
-    res.status(400)
-    throw new Error("Total amount must be greater than zero")
-  }
-
   if (!paymentMethod || !["cash", "card", "upi", "qr"].includes(paymentMethod)) {
     res.status(400)
     throw new Error("Invalid payment method")
@@ -70,28 +84,69 @@ exports.createCounterOrder = asyncHandler(async (req, res) => {
     throw new Error("Invoice not found")
   }
 
-  // Validate items
+  // Calculate subtotal and validate items
+  let calculatedSubtotal = 0
   for (const item of items) {
     if (!item.menuItemId || !item.name || !item.quantity || !item.price) {
       res.status(400)
       throw new Error("Invalid item data")
     }
+
     const menuItem = await Menu.findById(item.menuItemId)
     if (!menuItem) {
       res.status(404)
       throw new Error(`Menu item ${item.name} not found`)
     }
+
     if (menuItem.price !== item.price) {
       res.status(400)
       throw new Error(`Price mismatch for ${item.name}`)
     }
+
     if (menuItem.branchId.toString() !== branchId) {
       res.status(400)
       throw new Error(`Item ${item.name} does not belong to the selected branch`)
     }
+
+    // Add to subtotal
+    calculatedSubtotal += item.price * item.quantity
   }
 
-  // Create order
+  // Calculate tax and service charges (same as staff order)
+  const calculatedTax = calculatedSubtotal * TAX_RATE
+  const calculatedServiceCharge = calculatedSubtotal * SERVICE_CHARGE_RATE
+  const calculatedTotalAmount = calculatedSubtotal
+  const calculatedGrandTotal = calculatedSubtotal + calculatedTax + calculatedServiceCharge
+
+  // Validate provided amounts if they exist
+  if (providedSubtotal !== undefined && Math.abs(providedSubtotal - calculatedSubtotal) > 0.01) {
+    res.status(400)
+    throw new Error(`Subtotal mismatch: provided ₹${providedSubtotal}, calculated ₹${calculatedSubtotal}`)
+  }
+
+  if (providedTax !== undefined && Math.abs(providedTax - calculatedTax) > 0.01) {
+    res.status(400)
+    throw new Error(`Tax mismatch: provided ₹${providedTax}, calculated ₹${calculatedTax}`)
+  }
+
+  if (providedServiceCharge !== undefined && Math.abs(providedServiceCharge - calculatedServiceCharge) > 0.01) {
+    res.status(400)
+    throw new Error(
+      `Service charge mismatch: provided ₹${providedServiceCharge}, calculated ₹${calculatedServiceCharge}`,
+    )
+  }
+
+  if (providedTotalAmount !== undefined && Math.abs(providedTotalAmount - calculatedTotalAmount) > 0.01) {
+    res.status(400)
+    throw new Error(`Total amount mismatch: provided ₹${providedTotalAmount}, calculated ₹${calculatedTotalAmount}`)
+  }
+
+  if (providedGrandTotal !== undefined && Math.abs(providedGrandTotal - calculatedGrandTotal) > 0.01) {
+    res.status(400)
+    throw new Error(`Grand total mismatch: provided ₹${providedGrandTotal}, calculated ₹${calculatedGrandTotal}`)
+  }
+
+  // Create order with calculated amounts (same structure as staff order)
   const counterOrder = new CounterOrder({
     userId,
     customerName: customerName.trim(),
@@ -99,7 +154,11 @@ exports.createCounterOrder = asyncHandler(async (req, res) => {
     branch: branchId,
     invoice: invoiceId,
     items,
-    totalAmount,
+    subtotal: calculatedSubtotal,
+    tax: calculatedTax,
+    serviceCharge: calculatedServiceCharge,
+    totalAmount: calculatedTotalAmount,
+    grandTotal: calculatedGrandTotal,
     paymentMethod,
     orderStatus: "processing", // Default order status
     paymentStatus: status || "completed", // Payment status based on payment completion
@@ -136,7 +195,11 @@ exports.createCounterOrder = asyncHandler(async (req, res) => {
         invoiceNumber: populatedOrder.invoice.invoiceNumber,
       },
       items: populatedOrder.items,
+      subtotal: populatedOrder.subtotal,
+      tax: populatedOrder.tax,
+      serviceCharge: populatedOrder.serviceCharge,
       totalAmount: populatedOrder.totalAmount,
+      grandTotal: populatedOrder.grandTotal,
       paymentMethod: populatedOrder.paymentMethod,
       orderStatus: populatedOrder.orderStatus,
       paymentStatus: populatedOrder.paymentStatus,
@@ -187,7 +250,11 @@ exports.getCounterOrderById = asyncHandler(async (req, res) => {
         invoiceNumber: counterOrder.invoice.invoiceNumber,
       },
       items: counterOrder.items,
+      subtotal: counterOrder.subtotal,
+      tax: counterOrder.tax,
+      serviceCharge: counterOrder.serviceCharge,
       totalAmount: counterOrder.totalAmount,
+      grandTotal: counterOrder.grandTotal,
       paymentMethod: counterOrder.paymentMethod,
       orderStatus: counterOrder.orderStatus,
       paymentStatus: counterOrder.paymentStatus,
@@ -241,7 +308,11 @@ exports.getAllCounterOrders = asyncHandler(async (req, res) => {
           invoiceNumber: order.invoice.invoiceNumber,
         },
         items: order.items || [],
+        subtotal: order.subtotal,
+        tax: order.tax,
+        serviceCharge: order.serviceCharge,
         totalAmount: order.totalAmount,
+        grandTotal: order.grandTotal,
         paymentMethod: order.paymentMethod,
         orderStatus: order.orderStatus,
         paymentStatus: order.paymentStatus,
@@ -301,7 +372,11 @@ exports.getCounterOrdersByUserId = asyncHandler(async (req, res) => {
       invoiceNumber: order.invoice.invoiceNumber,
     },
     items: order.items || [],
+    subtotal: order.subtotal,
+    tax: order.tax,
+    serviceCharge: order.serviceCharge,
     totalAmount: order.totalAmount,
+    grandTotal: order.grandTotal,
     paymentMethod: order.paymentMethod,
     orderStatus: order.orderStatus,
     paymentStatus: order.paymentStatus,
@@ -331,6 +406,20 @@ exports.updateCounterOrder = asyncHandler(async (req, res) => {
   if (!counterOrder) {
     res.status(404)
     throw new Error("Counter order not found")
+  }
+
+  // If items are being updated, recalculate totals
+  if (updateData.items) {
+    let calculatedSubtotal = 0
+    for (const item of updateData.items) {
+      calculatedSubtotal += item.price * item.quantity
+    }
+
+    updateData.subtotal = calculatedSubtotal
+    updateData.tax = calculatedSubtotal * TAX_RATE
+    updateData.serviceCharge = calculatedSubtotal * SERVICE_CHARGE_RATE
+    updateData.totalAmount = calculatedSubtotal
+    updateData.grandTotal = calculatedSubtotal + updateData.tax + updateData.serviceCharge
   }
 
   // Update the order
@@ -369,7 +458,11 @@ exports.updateCounterOrder = asyncHandler(async (req, res) => {
         invoiceNumber: populatedOrder.invoice.invoiceNumber,
       },
       items: populatedOrder.items,
+      subtotal: populatedOrder.subtotal,
+      tax: populatedOrder.tax,
+      serviceCharge: populatedOrder.serviceCharge,
       totalAmount: populatedOrder.totalAmount,
+      grandTotal: populatedOrder.grandTotal,
       paymentMethod: populatedOrder.paymentMethod,
       orderStatus: populatedOrder.orderStatus,
       paymentStatus: populatedOrder.paymentStatus,
@@ -438,7 +531,11 @@ exports.updateCounterOrderStatus = asyncHandler(async (req, res) => {
         invoiceNumber: populatedOrder.invoice.invoiceNumber,
       },
       items: populatedOrder.items,
+      subtotal: populatedOrder.subtotal,
+      tax: populatedOrder.tax,
+      serviceCharge: populatedOrder.serviceCharge,
       totalAmount: populatedOrder.totalAmount,
+      grandTotal: populatedOrder.grandTotal,
       paymentMethod: populatedOrder.paymentMethod,
       orderStatus: populatedOrder.orderStatus,
       paymentStatus: populatedOrder.paymentStatus,
@@ -507,7 +604,11 @@ exports.updateCounterPaymentStatus = asyncHandler(async (req, res) => {
         invoiceNumber: populatedOrder.invoice.invoiceNumber,
       },
       items: populatedOrder.items,
+      subtotal: populatedOrder.subtotal,
+      tax: populatedOrder.tax,
+      serviceCharge: populatedOrder.serviceCharge,
       totalAmount: populatedOrder.totalAmount,
+      grandTotal: populatedOrder.grandTotal,
       paymentMethod: populatedOrder.paymentMethod,
       orderStatus: populatedOrder.orderStatus,
       paymentStatus: populatedOrder.paymentStatus,
@@ -590,7 +691,11 @@ exports.cancelCounterOrder = asyncHandler(async (req, res) => {
         invoiceNumber: populatedOrder.invoice.invoiceNumber,
       },
       items: populatedOrder.items,
+      subtotal: populatedOrder.subtotal,
+      tax: populatedOrder.tax,
+      serviceCharge: populatedOrder.serviceCharge,
       totalAmount: populatedOrder.totalAmount,
+      grandTotal: populatedOrder.grandTotal,
       paymentMethod: populatedOrder.paymentMethod,
       orderStatus: populatedOrder.orderStatus,
       paymentStatus: populatedOrder.paymentStatus,
