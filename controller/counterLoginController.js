@@ -22,8 +22,8 @@ exports.sendOtpForCounterRegistration = async (req, res) => {
       return res.status(400).json({ message: "Mobile number already registered" })
     }
 
-    const otp = generateOtp()
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
     counter = new Counter({
       name,
@@ -55,8 +55,8 @@ exports.sendOtpForCounterLogin = async (req, res) => {
       return res.status(404).json({ message: "Counter staff not found. Please register first." })
     }
 
-    const otp = generateOtp()
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); 
 
     counter.otp = otp
     counter.otpExpires = otpExpires
