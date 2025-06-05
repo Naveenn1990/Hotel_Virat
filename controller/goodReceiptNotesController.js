@@ -5,7 +5,7 @@ exports.getAllGRNs = async (req, res) => {
   try {
     const grns = await GoodsReceiptNote.find()
       .populate('supplierId', 'name')
-    //   .populate('branchId','name')
+      .populate('branchId','name')
     //   .populate('categoryId', 'name')
       .sort({ createdAt: -1 });
     res.json(grns);
@@ -20,7 +20,7 @@ exports.getGRN = async (req, res) => {
     const grn = await GoodsReceiptNote.findById(req.params.id)
       .populate("purchaseOrderId", "invoiceNumber")
       .populate("supplierId", "name")
-    //   .populate("branchId", "name");
+      .populate("branchId", "name");
     if (!grn) return res.status(404).json({ error: "GRN not found" });
     res.json(grn);
   } catch (err) {

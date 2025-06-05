@@ -25,7 +25,7 @@ const goodsReceiptNoteSchema = new mongoose.Schema(
     },
     quantity: { type: String, required: true },
     notes: { type: String },
-    // branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch" },
   },
   { timestamps: true }
 );
