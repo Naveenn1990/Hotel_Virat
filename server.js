@@ -101,6 +101,7 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const stockInwardRoutes = require('./routes/stockInwardRoutes');
+const pendingRoutes = require("./routes/pendingRoutes");
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -140,6 +141,7 @@ app.use("/hotel/store-locations", storeLocationRoutes)
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
 app.use('/hotel/stock-inwards', stockInwardRoutes);
+app.use("/hotel/pending", pendingRoutes);
 
 
 // Example axios request
