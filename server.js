@@ -95,6 +95,9 @@ const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
+const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
+
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -125,6 +128,8 @@ app.use("/hotel/raw-materials", rawMaterialRoutes)
 app.use("/hotel/store-locations", storeLocationRoutes)
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
+app.use("/hotel/product-submission", productSubmissionRoutes);
 
 // Example axios request
 axios.get("http://localhost:5000/hotel/branch")
