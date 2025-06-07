@@ -60,7 +60,7 @@ const productSubmissionSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "successful", "failed"],
+      enum: ["pending", "paid", "failed"],
       default: "pending",
     },
     rejectionReason: {
