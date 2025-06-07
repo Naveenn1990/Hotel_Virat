@@ -22,9 +22,9 @@ app.use(express.json());
 app.use(cors());
 
 // Define the rate limiter
-const limiter = rateLimit({
+const limiter = rateLimit({ 
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs
+  max: 500, // Limit each IP to 500 requests per windowMs 
   message: "Too many requests from this IP, please try again after 15 minutes"
 });
 
@@ -97,6 +97,7 @@ const RawMaterial = require("./routes/rawMaterialRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const storeLocationRoutes = require("./routes/storeLocationRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -128,7 +129,9 @@ app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
-app.use("/hotel/expense", expenseRoutes);
+app.use("/hotel/expense", expenseRoutes); 
+app.use("/hotel/store-location", storeLocationRoutes);
+
 
 // Define Port
 const PORT = process.env.PORT || 5000;

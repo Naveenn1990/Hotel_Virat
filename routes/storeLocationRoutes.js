@@ -1,41 +1,16 @@
-const express = require("express")
-const router = express.Router()
-const {
-  getAllStoreLocations,
-  getStoreLocationById,
-  createStoreLocation,
-  updateStoreLocation,
-  deleteStoreLocation,
-  permanentDeleteStoreLocation,
-  updateItemCount,
-} = require("../controller/storeLocationController")
+const express = require("express");
+const router = express.Router();
+const storeLocationController = require("../controller/storeLocationController");
 
-// Middleware for authentication (you'll need to implement this based on your auth system)
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"]
-  const token = authHeader && authHeader.split(" ")[1]
+router.post("/", storeLocationController.createStoreLocation);
 
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Access token required",
-    })
-  }
+router.get("/", storeLocationController.getAllStoreLocations);
 
-  // Add your JWT verification logic here
-  // For now, we'll assume the user is authenticated
-  // You should replace this with your actual JWT verification
-  req.user = { id: "user_id_here" } // Replace with actual user from token
-  next()
-}
+router.get("/:id", storeLocationController.getStoreLocationById);
 
-// Routes
-router.get("/", authenticateToken, getAllStoreLocations)
-router.get("/:id", authenticateToken, getStoreLocationById)
-router.post("/",  createStoreLocation)
-router.put("/:id", authenticateToken, updateStoreLocation)
-router.delete("/:id", authenticateToken, deleteStoreLocation)
-router.delete("/:id/permanent", authenticateToken, permanentDeleteStoreLocation)
-router.patch("/:id/item-count", authenticateToken, updateItemCount)
+router.put("/:id", storeLocationController.updateStoreLocation);
 
-module.exports = router
+
+router.delete("/:id", storeLocationController.deleteStoreLocation);
+
+module.exports = router;
