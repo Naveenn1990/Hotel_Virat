@@ -8,7 +8,7 @@ router.get("/orders", counterOrderController.getAllCounterOrders)
 // Get orders by user ID
 router.get("/orders/user/:userId", counterOrderController.getCounterOrdersByUserId)
 
-// Create a new order
+// Create a new orderwha
 router.post("/orders", counterOrderController.createCounterOrder)
 
 // Get order by ID
@@ -16,7 +16,7 @@ router.get("/orders/:id", counterOrderController.getCounterOrderById)
 
 // Update entire order
 router.put("/orders/:id", counterOrderController.updateCounterOrder)
-
+    
 // Update order status only
 router.put("/orders/:id/order-status", counterOrderController.updateCounterOrderStatus)
 
