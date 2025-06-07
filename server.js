@@ -99,8 +99,6 @@ const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
-const stockRoutes = require("./routes/stockInwardRoutes");
-const storeLocationRoutes = require("./routes/storeLocationRoutes");
 
 
 app.use("/hotel/user-auth", userRoutes);
