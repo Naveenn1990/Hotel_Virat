@@ -97,13 +97,11 @@ const RawMaterial = require("./routes/rawMaterialRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
-<<<<<<< HEAD
 const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
-
-=======
-const storeLocationRoutes = require("./routes/storeLocationRoutes");
->>>>>>> 3b82490c768edbcdc7711d7d892cdb7b10904d19
+const staffRoutes = require("./routes/staffRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const payrollRoutes = require("./routes/payrollRoutes")           
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -135,15 +133,12 @@ app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
-<<<<<<< HEAD
 app.use("/hotel/expense", expenseRoutes);
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
-=======
-app.use("/hotel/expense", expenseRoutes); 
-app.use("/hotel/store-location", storeLocationRoutes);
->>>>>>> 3b82490c768edbcdc7711d7d892cdb7b10904d19
-
+app.use("/hotel/hr/staff",staffRoutes);
+app.use("/hotel/hr/payroll",payrollRoutes);
+app.use("/hotel/hr/attendance",attendanceRoutes);
 
 // Define Port
 const PORT = process.env.PORT || 5000;
