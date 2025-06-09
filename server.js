@@ -22,9 +22,9 @@ app.use(express.json());
 app.use(cors());
 
 // Define the rate limiter
-const limiter = rateLimit({
+const limiter = rateLimit({ 
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs
+  max: 500, // Limit each IP to 500 requests per windowMs 
   message: "Too many requests from this IP, please try again after 15 minutes"
 });
 
@@ -92,16 +92,20 @@ const recipeRoutes = require("./routes/recipeRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
-// const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
-// const RawMaterial = require("./routes/rawMaterialRoutes");
-// const reservationRoutes = require("./routes/reservationRoutes");
-const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const rawMaterialRoutes = require("./routes/rawMaterialRoutes");
-const storeLocationRoutes = require("./routes/storeLocationRoutes");
+const RawMaterial = require("./routes/rawMaterialRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
+const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+
 const stockInwardRoutes = require('./routes/stockInwardRoutes');
 const pendingRoutes = require("./routes/pendingRoutes");
+
+const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
+const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
+
+
+const storeLocationRoutes = require("./routes/storeLocationRoutes");
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -126,28 +130,28 @@ app.use("/hotel/staff-order", staffOrderRoutes);
 app.use("/hotel/counter-order", counterOrderRoutes);
 app.use("/hotel/counter-bill", counterBillRoutes);
 app.use("/hotel/staff-invoice", staffInvoiceRoutes);
-// app.use("/hotel/raw-materials",RawMaterial)
+app.use("/hotel/raw-materials",RawMaterial)
 app.use("/hotel/recipes", recipeRoutes); 
 app.use("/hotel/customer", customerRoutes);
 app.use("/hotel/supplier", supplierRoutes);
 app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
-app.use("/hotel/raw-materials", rawMaterialRoutes)
-app.use("/hotel/recipes", recipeRoutes); 
-app.use("/hotel/customer", customerRoutes);
-app.use("/hotel/raw-materials", rawMaterialRoutes)
-app.use("/hotel/store-locations", storeLocationRoutes)
 app.use("/hotel/reservation", reservationRoutes);
+
 app.use("/hotel/expense", expenseRoutes);
+
 app.use('/hotel/stock-inwards', stockInwardRoutes);
 app.use("/hotel/pending", pendingRoutes);
 
+app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
+app.use("/hotel/product-submission", productSubmissionRoutes);
 
-// Example axios request
-axios.get("http://localhost:5000/hotel/branch")
-  .then(res => { /* handle response */ })
-  .catch(err => { /* handle error */ });
+app.use("/hotel/expense", expenseRoutes); 
+app.use("/hotel/store-location", storeLocationRoutes);
+
+
+
 
 // Define Port
 const PORT = process.env.PORT || 5000;
