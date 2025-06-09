@@ -10,6 +10,9 @@ router.route('/')
 router.route('/:id')
   .get(getPeopleSelectionById)
   .put(updatePeopleSelection)
-  .delete(deletePeopleSelection);
+  .delete(deletePeopleSelection); 
+
+   
+    
 
 module.exports = router;

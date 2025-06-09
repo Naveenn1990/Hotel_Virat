@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const productSubmissionSchema = new mongoose.Schema(
   {
@@ -47,6 +47,15 @@ const productSubmissionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      enum: [
+        "submitted",
+        "pending",
+        "approved",
+        "qr_uploaded",
+        "payment_uploaded",
+        "rejected",
+        "completed",
+      ],
       enum: [
         "submitted",
         "pending",
@@ -107,7 +116,7 @@ const productSubmissionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-module.exports = mongoose.model("ProductSubmission", productSubmissionSchema)
+module.exports = mongoose.model("ProductSubmission", productSubmissionSchema);

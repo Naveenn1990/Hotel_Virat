@@ -134,6 +134,10 @@ app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+
+// app.use('/hotel/stock-inwards', stockInwardRoutes);
+// app.use("/hotel/pending", pendingRoutes);
+
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);

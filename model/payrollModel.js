@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const payrollSchema = new mongoose.Schema(
   {
@@ -50,7 +50,6 @@ const payrollSchema = new mongoose.Schema(
     },
     netSalary: {
       type: Number,
-      // Remove required: true - let the pre-save hook calculate it
     },
     isPaid: {
       type: Boolean,
@@ -63,8 +62,8 @@ const payrollSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
 // Calculate net salary before saving
 payrollSchema.pre("save", function (next) {
@@ -77,40 +76,44 @@ payrollSchema.pre("save", function (next) {
       overtimeRate: this.overtimeRate,
       bonus: this.bonus,
       deductions: this.deductions,
-    })
+    });
 
     // Ensure all required fields are present
     if (!this.baseSalary || this.baseSalary <= 0) {
-      return next(new Error("Base salary is required and must be greater than 0"))
+      return next(
+        new Error("Base salary is required and must be greater than 0")
+      );
     }
 
     if (this.presentDays === undefined || this.presentDays < 0) {
-      return next(new Error("Present days is required and cannot be negative"))
+      return next(new Error("Present days is required and cannot be negative"));
     }
 
     // Calculate daily rate
-    const dailyRate = this.baseSalary / this.totalWorkingDays
+    const dailyRate = this.baseSalary / this.totalWorkingDays;
 
     // Calculate salary based on present days
-    const earnedSalary = dailyRate * this.presentDays
+    const earnedSalary = dailyRate * this.presentDays;
 
     // Calculate overtime pay (hourly rate * 1.5 * overtime hours)
-    const hourlyRate = this.baseSalary / (this.totalWorkingDays * 8)
-    const overtimePay = hourlyRate * this.overtimeRate * (this.overtime || 0)
+    const hourlyRate = this.baseSalary / (this.totalWorkingDays * 8);
+    const overtimePay = hourlyRate * this.overtimeRate * (this.overtime || 0);
 
     // Calculate net salary
-    this.netSalary = Math.round(earnedSalary + overtimePay + (this.bonus || 0) - (this.deductions || 0))
+    this.netSalary = Math.round(
+      earnedSalary + overtimePay + (this.bonus || 0) - (this.deductions || 0)
+    );
 
-    console.log("Calculated netSalary:", this.netSalary)
+    console.log("Calculated netSalary:", this.netSalary);
 
-    next()
+    next();
   } catch (error) {
-    console.error("Error in pre-save hook:", error)
-    next(error)
+    console.error("Error in pre-save hook:", error);
+    next(error);
   }
-})
+});
 
 // Compound index to ensure one payroll record per employee per month
-payrollSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true })
+payrollSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true });
 
-module.exports = mongoose.model("Payroll", payrollSchema)
+module.exports = mongoose.model("Payroll", payrollSchema);

@@ -1,4 +1,3 @@
-
 const Attendance = require("../model/attendanceModel")
 const Staff = require("../model/staffModel")
 const mongoose = require("mongoose")
@@ -8,10 +7,10 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id)
 }
 
-// Get all attendance records
+// Get all attendance records with improved month/year filtering
 exports.getAllAttendance = async (req, res) => {
   try {
-    console.log("Fetching all attendance records...")
+    console.log("Fetching attendance records with query:", req.query)
 
     const { date, employeeId, status, month, year } = req.query
     const query = {}
@@ -20,13 +19,26 @@ exports.getAllAttendance = async (req, res) => {
     if (employeeId) query.employeeId = employeeId
     if (status) query.status = status
 
+    // Improved month/year filtering
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1)
-      const endDate = new Date(year, month, 0)
-      query.date = { $gte: startDate, $lte: endDate }
+      const monthNum = parseInt(month)
+      const yearNum = parseInt(year)
+      
+      console.log("Filtering by month:", monthNum, "year:", yearNum)
+      
+      // Create date range for the entire month
+      const startDate = new Date(yearNum, monthNum - 1, 1)
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999)
+      
+      query.date = { 
+        $gte: startDate, 
+        $lte: endDate 
+      }
+      
+      console.log("Date range:", { startDate, endDate })
     }
 
-    console.log("Query:", query)
+    console.log("Final query:", query)
 
     const attendance = await Attendance.find(query).sort({ date: -1, employeeId: 1 })
     console.log(`Found ${attendance.length} attendance records`)
@@ -107,7 +119,7 @@ exports.getAttendanceById = async (req, res) => {
 // Create attendance record
 exports.createAttendance = async (req, res) => {
   try {
-    const { employeeId, date, inTime, outTime, status } = req.body
+    const { employeeId, date, inTime, outTime, status, overtime } = req.body
 
     console.log("Creating attendance with data:", req.body)
 
@@ -180,6 +192,7 @@ exports.createAttendance = async (req, res) => {
       inTime: status !== "Absent" ? inTime : null,
       outTime: status !== "Absent" ? outTime : null,
       status,
+      overtime: overtime || 0,
     })
 
     const savedAttendance = await attendance.save()
@@ -229,7 +242,7 @@ exports.createAttendance = async (req, res) => {
 // Update attendance record
 exports.updateAttendance = async (req, res) => {
   try {
-    const { employeeId, date, inTime, outTime, status } = req.body
+    const { employeeId, date, inTime, outTime, status, overtime } = req.body
 
     // Find staff with better logic
     let staff = null
@@ -257,6 +270,7 @@ exports.updateAttendance = async (req, res) => {
         inTime: status !== "Absent" ? inTime : null,
         outTime: status !== "Absent" ? outTime : null,
         status,
+        overtime: overtime || 0,
       },
       { new: true, runValidators: true },
     )
@@ -309,7 +323,7 @@ exports.deleteAttendance = async (req, res) => {
   }
 }
 
-// Get attendance summary for an employee
+// Get attendance summary for an employee with improved filtering
 exports.getAttendanceSummary = async (req, res) => {
   try {
     const { employeeId } = req.params
@@ -318,8 +332,12 @@ exports.getAttendanceSummary = async (req, res) => {
     const query = { employeeId }
 
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1)
-      const endDate = new Date(year, month, 0)
+      const monthNum = parseInt(month)
+      const yearNum = parseInt(year)
+      
+      const startDate = new Date(yearNum, monthNum - 1, 1)
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999)
+      
       query.date = { $gte: startDate, $lte: endDate }
     }
 
