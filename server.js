@@ -137,6 +137,10 @@ app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+
+
+// app.use("/hotel/pending", pendingRoutes);
+
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/hr/staff",staffRoutes);
