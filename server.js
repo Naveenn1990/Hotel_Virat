@@ -99,6 +99,8 @@ const goodsReceiptNoteRoutes = require("./routes/goodReceipNotesRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
+const stockRoutes = require("./routes/stockInwardRoutes");
+const storeLocationRoutes = require("./routes/storeLocationRoutes");
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -136,8 +138,7 @@ app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
-
-
+ 
 // Define Port
 const PORT = process.env.PORT || 5000;
 
