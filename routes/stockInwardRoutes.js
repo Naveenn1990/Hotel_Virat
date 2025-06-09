@@ -9,3 +9,6 @@ router.put('/:id', stockInwardController.updateStockInward);
 router.delete('/:id', stockInwardController.deleteStockInward);
 
 module.exports = router;
+
+
+

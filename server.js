@@ -101,7 +101,10 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const staffRoutes = require("./routes/staffRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
-const payrollRoutes = require("./routes/payrollRoutes")           
+const payrollRoutes = require("./routes/payrollRoutes");
+const storeLocationRoutes = require("./routes/storeLocationRoutes")  
+const inventoryRoutes = require("./routes/inventoryRoutes")
+const stockinwardRoutes = require("./routes/stockInwardRoutes")
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -139,6 +142,9 @@ app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/hr/staff",staffRoutes);
 app.use("/hotel/hr/payroll",payrollRoutes);
 app.use("/hotel/hr/attendance",attendanceRoutes);
+app.use("/hotel/store-location",storeLocationRoutes);
+app.use("/hotel/inventory", inventoryRoutes);
+app.use("/hotel/stock-inwards",stockinwardRoutes);
 
 // Define Port
 const PORT = process.env.PORT || 5000;
