@@ -56,6 +56,16 @@ const productSubmissionSchema = new mongoose.Schema(
         "rejected",
         "completed",
       ],
+      enum: [
+        "submitted",
+        "pending",
+        "approved",
+        "qr_uploaded",
+        "payment_uploaded",
+        "bill_uploaded",
+        "rejected",
+        "completed",
+      ],
       default: "submitted",
     },
     qrCodeUri: {
@@ -63,6 +73,10 @@ const productSubmissionSchema = new mongoose.Schema(
       default: null,
     },
     paymentImageUri: {
+      type: String,
+      default: null,
+    },
+    billImageUri: {
       type: String,
       default: null,
     },
@@ -92,6 +106,10 @@ const productSubmissionSchema = new mongoose.Schema(
       default: null,
     },
     paymentUploadedAt: {
+      type: Date,
+      default: null,
+    },
+    billUploadedAt: {
       type: Date,
       default: null,
     },

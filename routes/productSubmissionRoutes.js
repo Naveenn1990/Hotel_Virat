@@ -7,7 +7,14 @@ const multer = require("multer")
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Determine destination based on file type
-    const destination = file.fieldname === "qrCode" ? "uploads/qr-codes" : "uploads/payment-images"
+    let destination = "uploads/payment-images"
+    if (file.fieldname === "qrCode") {
+      destination = "uploads/qr-codes"
+    } else if (file.fieldname === "paymentImage") {
+      destination = "uploads/payment-images"
+    } else if (file.fieldname === "billImage") {
+      destination = "uploads/bill-images"
+    }
     cb(null, destination)
   },
   filename: (req, file, cb) => {
@@ -34,6 +41,7 @@ router.post("/", productSubmissionController.createSubmission)
 router.get("/", productSubmissionController.getAllSubmissions) // Admin route to get all submissions
 router.get("/user/:userPhone", productSubmissionController.getUserSubmissions)
 router.get("/approved/:userPhone", productSubmissionController.getApprovedSubmissions)
+router.get("/payment-uploaded/:userPhone", productSubmissionController.getPaymentUploadedSubmissions)
 router.get("/stats", productSubmissionController.getSubmissionStats)
 router.get("/:submissionId", productSubmissionController.getSubmissionById)
 
@@ -50,6 +58,7 @@ router.post(
   upload.single("paymentImage"),
   productSubmissionController.uploadPaymentImage,
 )
+router.post("/:submissionId/upload-bill-image", upload.single("billImage"), productSubmissionController.uploadBillImage)
 
 // Delete route
 router.delete("/:submissionId", productSubmissionController.deleteSubmission)

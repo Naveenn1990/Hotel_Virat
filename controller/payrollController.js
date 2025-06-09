@@ -8,6 +8,16 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id)
 }
 
+// Helper function to get month number from month name
+const getMonthNumber = (monthName) => {
+  const months = {
+    'January': 1, 'February': 2, 'March': 3, 'April': 4,
+    'May': 5, 'June': 6, 'July': 7, 'August': 8,
+    'September': 9, 'October': 10, 'November': 11, 'December': 12
+  }
+  return months[monthName] || parseInt(monthName)
+}
+
 // Helper function to calculate net salary
 const calculateNetSalary = (baseSalary, presentDays, overtime = 0, bonus = 0, deductions = 0, totalWorkingDays = 26) => {
   try {
@@ -42,18 +52,35 @@ const calculateNetSalary = (baseSalary, presentDays, overtime = 0, bonus = 0, de
   }
 }
 
-// Get all payroll records
+// Get all payroll records with improved filtering
 exports.getAllPayroll = async (req, res) => {
   try {
+    console.log("Fetching payroll records with query:", req.query)
+    
     const { month, year, employeeId, isPaid } = req.query
     const query = {}
 
-    if (month) query.month = month
-    if (year) query.year = Number.parseInt(year)
+    // Improved month filtering - handle both month names and numbers
+    if (month) {
+      // If month is a name like "May", store it as is
+      // If month is a number like "5", convert it to name
+      if (isNaN(month)) {
+        query.month = month
+      } else {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December']
+        query.month = monthNames[parseInt(month) - 1]
+      }
+    }
+    
+    if (year) query.year = parseInt(year)
     if (employeeId) query.employeeId = employeeId
     if (isPaid !== undefined) query.isPaid = isPaid === "true"
 
+    console.log("Final payroll query:", query)
+
     const payroll = await Payroll.find(query).sort({ createdAt: -1 })
+    console.log(`Found ${payroll.length} payroll records`)
 
     // Populate employee details with better error handling
     const payrollWithStaff = await Promise.all(
@@ -185,7 +212,7 @@ exports.createPayroll = async (req, res) => {
     const existingPayroll = await Payroll.findOne({
       employeeId: staffEmployeeId,
       month,
-      year: Number.parseInt(year),
+      year: parseInt(year),
     })
 
     if (existingPayroll) {
@@ -196,11 +223,11 @@ exports.createPayroll = async (req, res) => {
     }
 
     // Ensure all numeric values are properly converted
-    const presentDaysNum = Number.parseInt(presentDays)
-    const overtimeNum = Number.parseFloat(overtime) || 0
-    const deductionsNum = Number.parseFloat(deductions) || 0
-    const bonusNum = Number.parseFloat(bonus) || 0
-    const baseSalaryNum = Number.parseFloat(staff.salary)
+    const presentDaysNum = parseFloat(presentDays)
+    const overtimeNum = parseFloat(overtime) || 0
+    const deductionsNum = parseFloat(deductions) || 0
+    const bonusNum = parseFloat(bonus) || 0
+    const baseSalaryNum = parseFloat(staff.salary)
 
     // Validate salary
     if (!baseSalaryNum || baseSalaryNum <= 0) {
@@ -219,7 +246,7 @@ exports.createPayroll = async (req, res) => {
     const payroll = new Payroll({
       employeeId: staffEmployeeId,
       month,
-      year: Number.parseInt(year),
+      year: parseInt(year),
       baseSalary: baseSalaryNum,
       presentDays: presentDaysNum,
       overtime: overtimeNum,
@@ -296,11 +323,11 @@ exports.updatePayroll = async (req, res) => {
     }
 
     // Calculate new net salary
-    const baseSalaryNum = Number.parseFloat(staff.salary)
-    const presentDaysNum = Number.parseInt(presentDays)
-    const overtimeNum = Number.parseFloat(overtime) || 0
-    const deductionsNum = Number.parseFloat(deductions) || 0
-    const bonusNum = Number.parseFloat(bonus) || 0
+    const baseSalaryNum = parseFloat(staff.salary)
+    const presentDaysNum = parseFloat(presentDays)
+    const overtimeNum = parseFloat(overtime) || 0
+    const deductionsNum = parseFloat(deductions) || 0
+    const bonusNum = parseFloat(bonus) || 0
 
     const netSalary = calculateNetSalary(baseSalaryNum, presentDaysNum, overtimeNum, bonusNum, deductionsNum)
 
@@ -309,7 +336,7 @@ exports.updatePayroll = async (req, res) => {
       {
         employeeId: staff.employeeId,
         month,
-        year: Number.parseInt(year),
+        year: parseInt(year),
         baseSalary: baseSalaryNum,
         presentDays: presentDaysNum,
         overtime: overtimeNum,
@@ -429,7 +456,7 @@ exports.generatePayrollFromAttendance = async (req, res) => {
     const existingPayroll = await Payroll.findOne({
       employeeId: staff.employeeId,
       month,
-      year: Number.parseInt(year),
+      year: parseInt(year),
     })
 
     if (existingPayroll) {
@@ -440,9 +467,9 @@ exports.generatePayrollFromAttendance = async (req, res) => {
     }
 
     // Get attendance data for the month
-    const monthNum = new Date(`${month} 1, ${year}`).getMonth()
-    const startDate = new Date(year, monthNum, 1)
-    const endDate = new Date(year, monthNum + 1, 0)
+    const monthNum = getMonthNumber(month)
+    const startDate = new Date(year, monthNum - 1, 1)
+    const endDate = new Date(year, monthNum, 0, 23, 59, 59, 999)
 
     const attendance = await Attendance.find({
       employeeId: staff.employeeId,
@@ -454,14 +481,14 @@ exports.generatePayrollFromAttendance = async (req, res) => {
     const totalOvertime = attendance.reduce((sum, a) => sum + (a.overtime || 0), 0)
 
     // Calculate net salary
-    const baseSalaryNum = Number.parseFloat(staff.salary)
+    const baseSalaryNum = parseFloat(staff.salary)
     const netSalary = calculateNetSalary(baseSalaryNum, presentDays, totalOvertime, 0, 0)
 
     // Create payroll record
     const payroll = new Payroll({
       employeeId: staff.employeeId,
       month,
-      year: Number.parseInt(year),
+      year: parseInt(year),
       baseSalary: baseSalaryNum,
       presentDays,
       overtime: totalOvertime,

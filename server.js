@@ -104,9 +104,9 @@ const pendingRoutes = require("./routes/pendingRoutes");
 const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 
-
+=======
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
-
+>>>>>>> 3b82490c768edbcdc7711d7d892cdb7b10904d19
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -138,7 +138,7 @@ app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
-
+<<<<<<< HEAD
 app.use("/hotel/expense", expenseRoutes);
 
 app.use('/hotel/stock-inwards', stockInwardRoutes);
@@ -146,11 +146,10 @@ app.use("/hotel/pending", pendingRoutes);
 
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
-
+=======
 app.use("/hotel/expense", expenseRoutes); 
 app.use("/hotel/store-location", storeLocationRoutes);
-
-
+>>>>>>> 3b82490c768edbcdc7711d7d892cdb7b10904d19
 
 
 // Define Port

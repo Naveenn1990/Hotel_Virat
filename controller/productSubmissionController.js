@@ -345,6 +345,7 @@ exports.updateSubmissionStatus = async (req, res) => {
       "approved",
       "qr_uploaded",
       "payment_uploaded",
+      "bill_uploaded",
       "rejected",
       "completed",
     ]
@@ -480,6 +481,32 @@ exports.getApprovedSubmissions = async (req, res) => {
   }
 }
 
+// Get payment uploaded submissions for bill upload
+exports.getPaymentUploadedSubmissions = async (req, res) => {
+  try {
+    const { userPhone } = req.params
+
+    const submissions = await ProductSubmission.find({
+      userPhone,
+      status: "payment_uploaded",
+      paymentImageUri: { $ne: null },
+    })
+      .populate("userId", "phoneNumber name isActive createdAt")
+      .sort({ createdAt: -1 })
+
+    res.status(200).json({
+      success: true,
+      submissions,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching payment uploaded submissions",
+      error: error.message,
+    })
+  }
+}
+
 // Delete submission
 exports.deleteSubmission = async (req, res) => {
   try {
@@ -506,6 +533,14 @@ exports.deleteSubmission = async (req, res) => {
       const paymentPath = path.join(__dirname, "..", submission.paymentImageUri)
       if (fs.existsSync(paymentPath)) {
         fs.unlinkSync(paymentPath)
+      }
+    }
+
+    // Delete bill image file if exists
+    if (submission.billImageUri) {
+      const billPath = path.join(__dirname, "..", submission.billImageUri)
+      if (fs.existsSync(billPath)) {
+        fs.unlinkSync(billPath)
       }
     }
 
@@ -627,6 +662,67 @@ exports.uploadPaymentImage = async (req, res) => {
   }
 }
 
+// Upload bill image for submission
+exports.uploadBillImage = async (req, res) => {
+  try {
+    const { submissionId } = req.params
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Bill image is required",
+      })
+    }
+
+    const submission = await ProductSubmission.findById(submissionId)
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found",
+      })
+    }
+
+    if (submission.status !== "payment_uploaded" || !submission.paymentImageUri) {
+      return res.status(400).json({
+        success: false,
+        message: "Can only upload bill image for submissions with payment image uploaded",
+      })
+    }
+
+    // Delete old bill image if exists
+    if (submission.billImageUri) {
+      const oldPath = path.join(__dirname, "..", submission.billImageUri)
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath)
+      }
+    }
+
+    const updatedSubmission = await ProductSubmission.findByIdAndUpdate(
+      submissionId,
+      {
+        billImageUri: req.file.path,
+        status: "bill_uploaded",
+        billUploadedAt: new Date(),
+        updatedAt: new Date(),
+      },
+      { new: true },
+    )
+
+    res.status(200).json({
+      success: true,
+      message: "Bill image uploaded successfully!",
+      submission: updatedSubmission,
+    })
+  } catch (error) {
+    console.error("Error uploading bill image:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error uploading bill image",
+      error: error.message,
+    })
+  }
+}
+
 // Mark submission as completed
 exports.completeSubmission = async (req, res) => {
   try {
@@ -640,10 +736,10 @@ exports.completeSubmission = async (req, res) => {
       })
     }
 
-    if (submission.status !== "payment_uploaded" || !submission.paymentImageUri) {
+    if (submission.status !== "bill_uploaded" || !submission.billImageUri) {
       return res.status(400).json({
         success: false,
-        message: "Can only complete submissions with payment image uploaded",
+        message: "Can only complete submissions with bill image uploaded",
       })
     }
 
