@@ -647,3 +647,48 @@ exports.getOrderStatistics = async (req, res) => {
     })
   }
 }
+
+
+exports.updateKitchenStatus = async (req, res) => {
+  try {
+    const {  itemId } = req.params;
+    const { kitchenStatus } = req.body;
+
+    // Find the order
+    const order = await StaffOrder.findOne({ "items._id": itemId });
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Find the item inside the order
+    const item = order.items.id(itemId);
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found in order",
+      });
+    }
+
+    // Update the kitchenStatus
+    item.kitchenStatus = kitchenStatus;
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Kitchen status updated successfully",
+      item,
+      order,
+    });
+  } catch (error) {
+    console.error("Error updating kitchen status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating kitchen status",
+      error: error.message,
+    });
+  }
+};
