@@ -38,7 +38,7 @@ const upload = multer({
 
 // Submission routes
 router.post("/", productSubmissionController.createSubmission)
-router.get("/", productSubmissionController.getAllSubmissions) // Admin route to get all submissions
+router.get("/", productSubmissionController.getAllSubmissions)
 router.get("/user/:userPhone", productSubmissionController.getUserSubmissions)
 router.get("/approved/:userPhone", productSubmissionController.getApprovedSubmissions)
 router.get("/payment-uploaded/:userPhone", productSubmissionController.getPaymentUploadedSubmissions)

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const productSubmissionSchema = new mongoose.Schema(
   {
@@ -53,6 +53,15 @@ const productSubmissionSchema = new mongoose.Schema(
         "approved",
         "qr_uploaded",
         "payment_uploaded",
+        "rejected",
+        "completed",
+      ],
+      enum: [
+        "submitted",
+        "pending",
+        "approved",
+        "qr_uploaded",
+        "payment_uploaded",
         "bill_uploaded",
         "rejected",
         "completed",
@@ -73,7 +82,7 @@ const productSubmissionSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "successful", "failed"],
+      enum: ["pending", "paid", "failed"],
       default: "pending",
     },
     rejectionReason: {
@@ -107,7 +116,7 @@ const productSubmissionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-module.exports = mongoose.model("ProductSubmission", productSubmissionSchema)
+module.exports = mongoose.model("ProductSubmission", productSubmissionSchema);
