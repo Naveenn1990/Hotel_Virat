@@ -817,50 +817,37 @@ exports.getOrderStatistics = async (req, res) => {
   }
 }
 
-
-exports.updateKitchenStatus = async (req, res) => {
+// NEW: Get guest orders by mobile number
+exports.getGuestOrdersByMobile = async (req, res) => {
   try {
-    const { orderId, itemId } = req.params;
-    const { kitchenStatus } = req.body;
+    const { mobile } = req.params
 
-
-
-    // Find the order
-    const order = await StaffOrder.findById(orderId);
-    if (!order) {
-      return res.status(404).json({
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({
         success: false,
-        message: "Order not found",
-      });
+        message: "Valid 10-digit mobile number is required",
+      })
     }
 
-
-    // Find the item inside the order
-    const item = order.items.id(itemId);
-    if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Item not found in order",
-      });
-    }
-
-    // Update the kitchenStatus
-    item.kitchenStatus = kitchenStatus;
-
-    await order.save();
+    const orders = await StaffOrder.find({
+      customerMobile: mobile,
+      isGuestOrder: true,
+    })
+      .populate("branchId", "name address")
+      .populate("tableId", "number capacity")
+      .sort({ createdAt: -1 })
 
     res.status(200).json({
       success: true,
-      message: "Kitchen status updated successfully",
-      item,
-      order,
-    });
+      count: orders.length,
+      orders,
+    })
   } catch (error) {
-    console.error("Error updating kitchen status:", error);
+    console.error("Error fetching guest orders by mobile:", error)
     res.status(500).json({
       success: false,
-      message: "Error updating kitchen status",
+      message: "Error fetching guest orders by mobile",
       error: error.message,
-    });
+    })
   }
-};
+}

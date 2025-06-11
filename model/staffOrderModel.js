@@ -26,11 +26,6 @@ const sOrderItemSchema = new mongoose.Schema({
     type: String, // Added to store item description
     required: false,
   },
-  kitchenStatus: {
-    type: String,
-    enum: ["Received","Start Cooking", "Mark Ready", "Ready for Pickup", "Served"],
-    default: "Received", // Since order is created after payment success
-  },
 })
 
 const staffOrderSchema = new mongoose.Schema(
