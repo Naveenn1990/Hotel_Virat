@@ -39,6 +39,6 @@ router.post("/:id/items", staffOrderController.addItemsToStaffOrder)
 router.get("/branch/:branchId/table/:tableId", staffOrderController.getStaffOrdersByTable)
 
 //update kitchen status
-router.put("/updateKitchenStatus/:itemId", staffOrderController.updateKitchenStatus)
+router.put("/updateKitchenStatus/:orderId/:itemId", staffOrderController.updateKitchenStatus)
 
 module.exports = router

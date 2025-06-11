@@ -651,17 +651,20 @@ exports.getOrderStatistics = async (req, res) => {
 
 exports.updateKitchenStatus = async (req, res) => {
   try {
-    const {  itemId } = req.params;
+    const { orderId, itemId } = req.params;
     const { kitchenStatus } = req.body;
 
+
+
     // Find the order
-    const order = await StaffOrder.findOne({ "items._id": itemId });
+    const order = await StaffOrder.findById(orderId);
     if (!order) {
       return res.status(404).json({
         success: false,
         message: "Order not found",
       });
     }
+
 
     // Find the item inside the order
     const item = order.items.id(itemId);
