@@ -2,7 +2,7 @@ const StaffOrder = require("../model/staffOrderModel")
 const StaffLogin = require("../model/staffLoginModel")
 const mongoose = require("mongoose")
 
-// Create a new staff order after payment success
+// Create a new staff order after payment success (EXISTING - UPDATED)
 exports.createStaffOrderAfterPayment = async (req, res) => {
   try {
     const {
@@ -21,13 +21,13 @@ exports.createStaffOrderAfterPayment = async (req, res) => {
       tableId,
     } = req.body
 
-    console.log("Received order creation request with userId:", userId)
+    console.log("Received staff order creation request with userId:", userId)
 
     // Validate userId
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "User ID is required",
+        message: "User ID is required for staff orders",
       })
     }
 
@@ -120,6 +120,7 @@ exports.createStaffOrderAfterPayment = async (req, res) => {
       orderTime: new Date(orderTime),
       notes: notes || "",
       status: "pending",
+      isGuestOrder: false, // This is a staff order
     }
 
     // Add IDs if provided by frontend
@@ -139,24 +140,152 @@ exports.createStaffOrderAfterPayment = async (req, res) => {
     const staffOrder = new StaffOrder(orderData)
     await staffOrder.save()
 
-    console.log("Order created successfully for user:", userId, "Order ID:", staffOrder.orderId)
+    console.log("Staff order created successfully for user:", userId, "Order ID:", staffOrder.orderId)
 
     res.status(201).json({
       success: true,
-      message: "Order created successfully",
+      message: "Staff order created successfully",
       order: staffOrder,
     })
   } catch (error) {
     console.error("Error creating staff order after payment:", error)
     res.status(500).json({
       success: false,
-      message: "Error creating order after payment",
+      message: "Error creating staff order after payment",
       error: error.message,
     })
   }
 }
 
-// Get orders by userId - NEW FUNCTION
+// NEW: Create a guest order
+exports.createGuestOrder = async (req, res) => {
+  try {
+    const {
+      orderId,
+      customerName,
+      customerMobile,
+      branchId,
+      branchName,
+      tableNumber,
+      peopleCount,
+      items,
+      subtotal,
+      tax,
+      serviceCharge,
+      totalAmount,
+      grandTotal,
+      paymentMethod,
+      orderTime,
+      notes,
+    } = req.body
+
+    console.log("Received guest order creation request:", req.body)
+
+    // Validate required fields for guest orders
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      })
+    }
+
+    if (!customerName || !customerName.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Customer name is required",
+      })
+    }
+
+    if (!customerMobile || !customerMobile.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Customer mobile is required",
+      })
+    }
+
+    // Validate mobile number format
+    if (!/^[0-9]{10}$/.test(customerMobile.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number must be 10 digits",
+      })
+    }
+
+    if (!branchId || !branchName) {
+      return res.status(400).json({
+        success: false,
+        message: "Branch information is required",
+      })
+    }
+
+    if (!tableNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Table number is required",
+      })
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Order must contain at least one item",
+      })
+    }
+
+    // Check if order already exists
+    const existingOrder = await StaffOrder.findOne({ orderId })
+    if (existingOrder) {
+      return res.status(200).json({
+        success: true,
+        message: "Order already exists",
+        order: existingOrder,
+      })
+    }
+
+    // Create the guest order using StaffOrder model
+    const guestOrder = new StaffOrder({
+      orderId,
+      customerName: customerName.trim(),
+      customerMobile: customerMobile.trim(),
+      branchId: branchId,
+      branchName,
+      tableId: new mongoose.Types.ObjectId(), // Generate a temporary table ID
+      tableNumber,
+      peopleCount: Number.parseInt(peopleCount) || 1,
+      items,
+      subtotal: Number.parseFloat(subtotal) || 0,
+      tax: Number.parseFloat(tax) || 0,
+      serviceCharge: Number.parseFloat(serviceCharge) || 0,
+      totalAmount: Number.parseFloat(totalAmount) || 0,
+      grandTotal: Number.parseFloat(grandTotal) || 0,
+      paymentMethod: paymentMethod || "cash",
+      paymentStatus: "pending", // Guest orders start as pending payment
+      orderTime: new Date(orderTime) || new Date(),
+      notes: notes || `Guest order from Table ${tableNumber}`,
+      status: "pending",
+      isGuestOrder: true, // Mark as guest order
+    })
+
+    await guestOrder.save()
+
+    console.log("Guest order created successfully:", guestOrder.orderId)
+
+    res.status(201).json({
+      success: true,
+      message: "Guest order created successfully",
+      order: guestOrder,
+    })
+  } catch (error) {
+    console.error("Error creating guest order:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error creating guest order",
+      error: error.message,
+    })
+  }
+}
+
+// Get orders by userId - EXISTING FUNCTION
 exports.getOrdersByUserId = async (req, res) => {
   try {
     const { userId } = req.params
@@ -182,13 +311,13 @@ exports.getOrdersByUserId = async (req, res) => {
 
     console.log("User found:", user.name)
 
-    const orders = await StaffOrder.find({ userId })
+    const orders = await StaffOrder.find({ userId, isGuestOrder: false }) // Only staff orders
       .populate("branchId", "name address")
       .populate("tableId", "number capacity")
       .populate("userId", "name mobile") // Populate user details
       .sort({ createdAt: -1 })
 
-    console.log("Found orders:", orders.length)
+    console.log("Found staff orders:", orders.length)
 
     res.status(200).json({
       success: true,
@@ -209,10 +338,10 @@ exports.getOrdersByUserId = async (req, res) => {
   }
 }
 
-// Get all staff orders (existing function)
+// Get all orders (both staff and guest) - UPDATED FUNCTION
 exports.getAllStaffOrders = async (req, res) => {
   try {
-    const { branchId, branchName, tableId, tableNumber, status, paymentStatus, userId, search } = req.query
+    const { branchId, branchName, tableId, tableNumber, status, paymentStatus, userId, search, orderType } = req.query
 
     // Build filter based on query parameters
     const filter = {}
@@ -224,16 +353,30 @@ exports.getAllStaffOrders = async (req, res) => {
     if (paymentStatus) filter.paymentStatus = paymentStatus
     if (userId) filter.userId = userId
 
+    // NEW: Filter by order type
+    if (orderType === "staff") {
+      filter.isGuestOrder = false
+    } else if (orderType === "guest") {
+      filter.isGuestOrder = true
+    }
+    // If orderType is "all" or not specified, don't add filter
+
     // Add search functionality
     if (search) {
       const searchRegex = new RegExp(search, "i")
-      filter.$or = [{ orderId: searchRegex }, { tableNumber: searchRegex }, { branchName: searchRegex }]
+      filter.$or = [
+        { orderId: searchRegex },
+        { tableNumber: searchRegex },
+        { branchName: searchRegex },
+        { customerName: searchRegex }, // NEW: Search guest customer names
+        { customerMobile: searchRegex }, // NEW: Search guest mobile numbers
+      ]
     }
 
     const staffOrders = await StaffOrder.find(filter)
       .populate("branchId", "name address")
       .populate("tableId", "number capacity")
-      .populate("userId", "name mobile")
+      .populate("userId", "name mobile") // This will be null for guest orders
       .sort({ createdAt: -1 })
 
     res.status(200).json({
@@ -242,16 +385,16 @@ exports.getAllStaffOrders = async (req, res) => {
       orders: staffOrders,
     })
   } catch (error) {
-    console.error("Error fetching staff orders:", error)
+    console.error("Error fetching orders:", error)
     res.status(500).json({
       success: false,
-      message: "Error fetching staff orders",
+      message: "Error fetching orders",
       error: error.message,
     })
   }
 }
 
-// Get a staff order by ID
+// Get a staff order by ID - EXISTING FUNCTION
 exports.getStaffOrderById = async (req, res) => {
   try {
     const staffOrder = await StaffOrder.findById(req.params.id)
@@ -262,7 +405,7 @@ exports.getStaffOrderById = async (req, res) => {
     if (!staffOrder) {
       return res.status(404).json({
         success: false,
-        message: "Staff order not found",
+        message: "Order not found",
       })
     }
     res.status(200).json({
@@ -270,16 +413,16 @@ exports.getStaffOrderById = async (req, res) => {
       order: staffOrder,
     })
   } catch (error) {
-    console.error("Error fetching staff order:", error)
+    console.error("Error fetching order:", error)
     res.status(500).json({
       success: false,
-      message: "Error fetching staff order",
+      message: "Error fetching order",
       error: error.message,
     })
   }
 }
 
-// Get staff order by orderId
+// Get staff order by orderId - EXISTING FUNCTION
 exports.getStaffOrderByOrderId = async (req, res) => {
   try {
     const { orderId } = req.params
@@ -313,7 +456,7 @@ exports.getStaffOrderByOrderId = async (req, res) => {
   }
 }
 
-// Update a staff order status (UPDATED to include payment status)
+// Update a staff order status - EXISTING FUNCTION (works for both staff and guest orders)
 exports.updateStaffOrderStatus = async (req, res) => {
   try {
     const { status, paymentStatus, paymentMethod, notes } = req.body
@@ -357,7 +500,7 @@ exports.updateStaffOrderStatus = async (req, res) => {
     if (!staffOrder) {
       return res.status(404).json({
         success: false,
-        message: "Staff order not found",
+        message: "Order not found",
       })
     }
 
@@ -367,16 +510,16 @@ exports.updateStaffOrderStatus = async (req, res) => {
       order: staffOrder,
     })
   } catch (error) {
-    console.error("Error updating staff order:", error)
+    console.error("Error updating order:", error)
     res.status(400).json({
       success: false,
-      message: "Error updating staff order",
+      message: "Error updating order",
       error: error.message,
     })
   }
 }
 
-// Delete a staff order (only pending orders)
+// Delete a staff order - EXISTING FUNCTION (works for both staff and guest orders)
 exports.deleteStaffOrder = async (req, res) => {
   try {
     const staffOrder = await StaffOrder.findById(req.params.id)
@@ -384,7 +527,7 @@ exports.deleteStaffOrder = async (req, res) => {
     if (!staffOrder) {
       return res.status(404).json({
         success: false,
-        message: "Staff order not found",
+        message: "Order not found",
       })
     }
 
@@ -400,19 +543,19 @@ exports.deleteStaffOrder = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Staff order deleted successfully",
+      message: "Order deleted successfully",
     })
   } catch (error) {
-    console.error("Error deleting staff order:", error)
+    console.error("Error deleting order:", error)
     res.status(500).json({
       success: false,
-      message: "Error deleting staff order",
+      message: "Error deleting order",
       error: error.message,
     })
   }
 }
 
-// Add items to an existing staff order
+// Add items to an existing staff order - EXISTING FUNCTION
 exports.addItemsToStaffOrder = async (req, res) => {
   try {
     const { items } = req.body
@@ -430,7 +573,7 @@ exports.addItemsToStaffOrder = async (req, res) => {
     if (!staffOrder) {
       return res.status(404).json({
         success: false,
-        message: "Staff order not found",
+        message: "Order not found",
       })
     }
 
@@ -477,20 +620,20 @@ exports.addItemsToStaffOrder = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Items added to staff order successfully",
+      message: "Items added to order successfully",
       order: staffOrder,
     })
   } catch (error) {
-    console.error("Error adding items to staff order:", error)
+    console.error("Error adding items to order:", error)
     res.status(400).json({
       success: false,
-      message: "Error adding items to staff order",
+      message: "Error adding items to order",
       error: error.message,
     })
   }
 }
 
-// Get staff orders by branch and table
+// Get staff orders by branch and table - EXISTING FUNCTION
 exports.getStaffOrdersByTable = async (req, res) => {
   try {
     const { branchId, tableId } = req.params
@@ -514,16 +657,16 @@ exports.getStaffOrdersByTable = async (req, res) => {
       orders: staffOrders,
     })
   } catch (error) {
-    console.error("Error fetching staff orders for table:", error)
+    console.error("Error fetching orders for table:", error)
     res.status(500).json({
       success: false,
-      message: "Error fetching staff orders for table",
+      message: "Error fetching orders for table",
       error: error.message,
     })
   }
 }
 
-// Get orders by payment status
+// Get orders by payment status - EXISTING FUNCTION
 exports.getOrdersByPaymentStatus = async (req, res) => {
   try {
     const { paymentStatus } = req.params
@@ -549,16 +692,23 @@ exports.getOrdersByPaymentStatus = async (req, res) => {
   }
 }
 
-// Get orders by branch
+// Get orders by branch - EXISTING FUNCTION
 exports.getOrdersByBranch = async (req, res) => {
   try {
     const { branchId } = req.params
-    const { status, paymentStatus, userId } = req.query
+    const { status, paymentStatus, userId, orderType } = req.query
 
     const filter = { branchId }
     if (status) filter.status = status
     if (paymentStatus) filter.paymentStatus = paymentStatus
     if (userId) filter.userId = userId
+
+    // NEW: Filter by order type
+    if (orderType === "staff") {
+      filter.isGuestOrder = false
+    } else if (orderType === "guest") {
+      filter.isGuestOrder = true
+    }
 
     const orders = await StaffOrder.find(filter)
       .populate("branchId", "name address")
@@ -581,14 +731,21 @@ exports.getOrdersByBranch = async (req, res) => {
   }
 }
 
-// Get order statistics
+// Get order statistics - UPDATED FUNCTION
 exports.getOrderStatistics = async (req, res) => {
   try {
-    const { branchId, userId } = req.query
+    const { branchId, userId, orderType } = req.query
 
     const matchFilter = {}
     if (branchId) matchFilter.branchId = new mongoose.Types.ObjectId(branchId)
     if (userId) matchFilter.userId = new mongoose.Types.ObjectId(userId)
+
+    // NEW: Filter by order type
+    if (orderType === "staff") {
+      matchFilter.isGuestOrder = false
+    } else if (orderType === "guest") {
+      matchFilter.isGuestOrder = true
+    }
 
     const stats = await StaffOrder.aggregate([
       { $match: matchFilter },
@@ -602,6 +759,12 @@ exports.getOrderStatistics = async (req, res) => {
           },
           completedOrders: {
             $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+          },
+          staffOrders: {
+            $sum: { $cond: [{ $eq: ["$isGuestOrder", false] }, 1, 0] },
+          },
+          guestOrders: {
+            $sum: { $cond: [{ $eq: ["$isGuestOrder", true] }, 1, 0] },
           },
           averageOrderValue: { $avg: "$grandTotal" },
         },
@@ -627,6 +790,12 @@ exports.getOrderStatistics = async (req, res) => {
           branchName: { $first: "$branchName" },
           totalOrders: { $sum: 1 },
           totalRevenue: { $sum: "$grandTotal" },
+          staffOrders: {
+            $sum: { $cond: [{ $eq: ["$isGuestOrder", false] }, 1, 0] },
+          },
+          guestOrders: {
+            $sum: { $cond: [{ $eq: ["$isGuestOrder", true] }, 1, 0] },
+          },
         },
       },
       { $sort: { totalRevenue: -1 } },
@@ -643,6 +812,41 @@ exports.getOrderStatistics = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching order statistics",
+      error: error.message,
+    })
+  }
+}
+
+// NEW: Get guest orders by mobile number
+exports.getGuestOrdersByMobile = async (req, res) => {
+  try {
+    const { mobile } = req.params
+
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid 10-digit mobile number is required",
+      })
+    }
+
+    const orders = await StaffOrder.find({
+      customerMobile: mobile,
+      isGuestOrder: true,
+    })
+      .populate("branchId", "name address")
+      .populate("tableId", "number capacity")
+      .sort({ createdAt: -1 })
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    })
+  } catch (error) {
+    console.error("Error fetching guest orders by mobile:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error fetching guest orders by mobile",
       error: error.message,
     })
   }

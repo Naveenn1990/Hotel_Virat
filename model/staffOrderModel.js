@@ -33,7 +33,28 @@ const staffOrderSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "StaffLogin", // Reference to StaffLogin model
-      required: [true, "User ID is required"],
+      required: false, // CHANGED: Made optional for guest orders
+    },
+    // NEW FIELDS FOR GUEST ORDERS
+    customerName: {
+      type: String,
+      required: false, // Required for guest orders, optional for staff orders
+      trim: true,
+    },
+    customerMobile: {
+      type: String,
+      required: false, // Required for guest orders, optional for staff orders
+      validate: {
+        validator: (v) => {
+          // Only validate if value is provided
+          return !v || /^[0-9]{10}$/.test(v)
+        },
+        message: "Mobile number must be 10 digits",
+      },
+    },
+    isGuestOrder: {
+      type: Boolean,
+      default: false, // NEW: Flag to identify guest orders
     },
     orderId: {
       type: String,
@@ -92,7 +113,10 @@ const staffOrderSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       enum: ["pending", "completed", "failed", "refunded"],
-      default: "completed", // Since order is created after payment success
+      default: function () {
+        // Default to pending for guest orders, completed for staff orders
+        return this.isGuestOrder ? "pending" : "completed"
+      },
     },
     paymentMethod: {
       type: String,
@@ -118,13 +142,35 @@ const staffOrderSchema = new mongoose.Schema(
   },
 )
 
+// UPDATED: Custom validation to ensure either userId OR (customerName + customerMobile) is provided
+staffOrderSchema.pre("validate", function (next) {
+  if (this.isGuestOrder) {
+    // For guest orders, require customerName and customerMobile
+    if (!this.customerName || !this.customerMobile) {
+      return next(new Error("Guest orders require customerName and customerMobile"))
+    }
+    // Validate mobile number format for guest orders
+    if (!/^[0-9]{10}$/.test(this.customerMobile)) {
+      return next(new Error("Mobile number must be 10 digits"))
+    }
+  } else {
+    // For staff orders, require userId
+    if (!this.userId) {
+      return next(new Error("Staff orders require userId"))
+    }
+  }
+  next()
+})
+
 // Add indexes for faster queries
 staffOrderSchema.index({ userId: 1 })
 staffOrderSchema.index({ orderId: 1 })
 staffOrderSchema.index({ branchId: 1, tableId: 1 })
 staffOrderSchema.index({ branchName: 1, tableNumber: 1 })
 staffOrderSchema.index({ status: 1 })
-staffOrderSchema.index({ paymentStatus: 1 }) // NEW INDEX ADDED
-staffOrderSchema.index({ paymentMethod: 1 }) // NEW INDEX ADDED
+staffOrderSchema.index({ paymentStatus: 1 })
+staffOrderSchema.index({ paymentMethod: 1 })
+staffOrderSchema.index({ isGuestOrder: 1 }) // NEW INDEX
+staffOrderSchema.index({ customerMobile: 1 }) // NEW INDEX for guest orders
 
 module.exports = mongoose.model("StaffOrder", staffOrderSchema)
