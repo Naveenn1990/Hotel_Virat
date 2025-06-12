@@ -242,6 +242,27 @@ exports.createGuestOrder = async (req, res) => {
       })
     }
 
+    // Import Table model
+    const Table = require("../model/Table")
+
+    // Find the table by branch and table number
+    const table = await Table.findOne({
+      branchId: branchId,
+      number: Number.parseInt(tableNumber),
+    })
+
+    let tableId = new mongoose.Types.ObjectId() // Default to a new ObjectId
+
+    // If table exists, use its ID and update its status
+    if (table) {
+      tableId = table._id
+
+      // Update table status to reserved
+      await Table.findByIdAndUpdate(tableId, { status: "reserved" }, { new: true })
+
+      console.log(`Table ${tableNumber} status updated to reserved`)
+    }
+
     // Create the guest order using StaffOrder model
     const guestOrder = new StaffOrder({
       orderId,
@@ -249,7 +270,7 @@ exports.createGuestOrder = async (req, res) => {
       customerMobile: customerMobile.trim(),
       branchId: branchId,
       branchName,
-      tableId: new mongoose.Types.ObjectId(), // Generate a temporary table ID
+      tableId: tableId,
       tableNumber,
       peopleCount: Number.parseInt(peopleCount) || 1,
       items,
