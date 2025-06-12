@@ -101,6 +101,9 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
+const roleRoutes = require('./routes/roleRoutes');
+const configurationRoutes = require('./routes/configurationRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -134,6 +137,7 @@ app.use("/hotel/purchase", purchaseRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+ 
 
 // app.use('/hotel/stock-inwards', stockInwardRoutes);
 // app.use("/hotel/pending", pendingRoutes);
@@ -142,7 +146,11 @@ app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
+app.use('/config/roles', roleRoutes);
+app.use("/config/configuration", configurationRoutes);
+app.use("/report", reportRoutes);
  
+
 // Define Port
 const PORT = process.env.PORT || 5000;
 
