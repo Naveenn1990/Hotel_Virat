@@ -104,6 +104,13 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const leaveRoutes = require("./routes/leaveRoutes");
+const siteRoutes = require("./routes/siteRoutes");
+const EmployeeRoutes = require("./routes/employeeRoutes");
+const attendanceRoutesConstruction = require("./routes/attendanceRoutesConstruction");
+const payrollRoutesConstruction = require("./routes/payrollRoutesConstruction");
+const payslipRoutes = require("./routes/payslipRoutes");   
+const supervisorexpense = require("./routes/supervisorexpenseRoutes");
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -154,16 +161,17 @@ app.use("/report", reportRoutes);
 
 
 //Construction
-app.use("/construction/leave", leaveRoutes);
-app.use("/construction/site", siteRoutes);
-app.use("/construction/employee", EmployeeRoutes);
-app.use("/construction/attendance", attendanceRoutesConstruction);
-app.use("/construction/payroll", payrollRoutesConstruction);
-app.use("/construction/payslip", payslipRoutes);
+// app.use("/construction/leave", leaveRoutes);
+// app.use("/construction/site", siteRoutes);
+// app.use("/construction/employee", EmployeeRoutes);
+// app.use("/construction/attendance", attendanceRoutesConstruction);
+// app.use("/construction/payroll", payrollRoutesConstruction);
+// app.use("/construction/payslip", payslipRoutes); 
+app.use("/construction/supervisorexpense", supervisorexpense)
 // Define Port
 const PORT = process.env.PORT || 5000;
 
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});   
+});
