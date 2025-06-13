@@ -151,6 +151,15 @@ app.use("/config/configuration", configurationRoutes);
 app.use("/report", reportRoutes);
  
 
+
+
+//Construction
+app.use("/construction/leave", leaveRoutes);
+app.use("/construction/site", siteRoutes);
+app.use("/construction/employee", EmployeeRoutes);
+app.use("/construction/attendance", attendanceRoutesConstruction);
+app.use("/construction/payroll", payrollRoutesConstruction);
+app.use("/construction/payslip", payslipRoutes);
 // Define Port
 const PORT = process.env.PORT || 5000;
 
