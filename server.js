@@ -110,6 +110,17 @@ const EmployeeRoutes = require('./routes/employeeRoutes');
 const attendanceRoutesConstruction = require('./routes/attendanceRoutes');
 const payrollRoutesConstruction = require('./routes/payrollRoutes');
 const payslipRoutes = require('./routes/payslipRoutes');
+const vendorRoutes = require('./routes/vendorRoutes');
+const rfqRoutes = require('./routes/rfqRoutes');
+const quotationRoutes = require('./routes/quotationRoutes');
+const poRoutes = require('./routes/poRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
+const grnRoutes = require('./routes/grnRoutes');
+
+
+
+
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -166,6 +177,14 @@ app.use("/construction/employee", EmployeeRoutes);
 app.use("/construction/attendance", attendanceRoutesConstruction);
 app.use("/construction/payroll", payrollRoutesConstruction);
 app.use("/construction/payslip", payslipRoutes);
+app.use("/construction/vendor", vendorRoutes);
+app.use("/construction/rfq", rfqRoutes);
+app.use("/construction/quotation", quotationRoutes);
+app.use("/construction/po", poRoutes);
+app.use("/construction/payment", paymentRoutes);
+app.use("/construction/invoice", invoiceRoutes);
+app.use("/construction/grn", grnRoutes);
+
 // Define Port
 const PORT = process.env.PORT || 5000;
 
