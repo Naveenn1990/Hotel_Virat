@@ -1,8 +1,8 @@
 const Reservation = require("../model/Reservation")
 const Table = require("../model/Table")
 const Customer = require("../model/customerModel")
+ 
 
-// Create a new reservation
 const createReservation = async (req, res) => {
   try {
     console.log("Creating reservation with data:", req.body)
@@ -24,7 +24,7 @@ const createReservation = async (req, res) => {
       return res.status(400).json({ error: "Required fields are missing" })
     }
 
-    // Check if table exists
+    
     const table = await Table.findById(tableId)
     if (!table) {
       return res.status(404).json({ error: "Table not found" })
