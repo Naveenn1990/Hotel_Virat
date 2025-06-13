@@ -104,6 +104,12 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const leaveRoutes = require('./routes/leaveRoutes');
+const siteRoutes = require('./routes/siteroutes');
+const EmployeeRoutes = require('./routes/employeeRoutes');
+const attendanceRoutesConstruction = require('./routes/attendanceRoutes');
+const payrollRoutesConstruction = require('./routes/payrollRoutes');
+const payslipRoutes = require('./routes/payslipRoutes');
 
 
 app.use("/hotel/user-auth", userRoutes);
