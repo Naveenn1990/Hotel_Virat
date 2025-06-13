@@ -105,6 +105,13 @@ const payrollRoutes = require("./routes/payrollRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes")  
 const inventoryRoutes = require("./routes/inventoryRoutes")
 const stockinwardRoutes = require("./routes/stockInwardRoutes")
+const leaveRoutes = require("./routes/leaveRoutes");
+const siteRoutes = require("./routes/site.routes");
+const EmployeeRoutes = require("./routes/employeeRoutes");
+const attendanceRoutesConstruction = require("./routes/attendanceRoutesConstruction");
+const payrollRoutesConstruction = require("./routes/payrollRoutesConstruction");
+const payslipRoutes = require("./routes/payslipRoutes");    
+const supervisorexpenseRoutes = require("./routes/supervisorexpenseRoutes");
 
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
@@ -137,6 +144,8 @@ app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+app.use("/construction/supervisorexpense", supervisorexpenseRoutes);
+
 
 
 // app.use("/hotel/pending", pendingRoutes);
@@ -148,8 +157,17 @@ app.use("/hotel/hr/payroll",payrollRoutes);
 app.use("/hotel/hr/attendance",attendanceRoutes);
 app.use("/hotel/store-location",storeLocationRoutes);
 app.use("/hotel/inventory", inventoryRoutes);
-app.use("/hotel/stock-inwards",stockinwardRoutes);
+app.use("/hotel/stock-inwards", stockinwardRoutes);
 
+
+
+//Construction
+app.use("/construction/leave", leaveRoutes);
+app.use("/construction/site", siteRoutes);
+app.use("/construction/employee", EmployeeRoutes);
+app.use("/construction/attendance", attendanceRoutesConstruction);
+app.use("/construction/payroll", payrollRoutesConstruction);
+app.use("/construction/payslip", payslipRoutes);
 // Define Port
 const PORT = process.env.PORT || 5000;
 
