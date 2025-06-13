@@ -24,7 +24,7 @@ exports.createAboutUs = async (req, res) => {
       return res.status(400).json({ message: " description, and mission are required" })
     }
 
-    const aboutUs = new AboutUs({
+    const aboutUs = new AboutUs({ 
      
       description,
       mission,
@@ -59,7 +59,6 @@ exports.updateAboutUs = async (req, res) => {
     res.status(400).json({ message: "Error updating about us information", error: error.message })
   }
 }
-
 // Admin: Get all about us entries
 exports.getAllAboutUs = async (req, res) => {
   try {
