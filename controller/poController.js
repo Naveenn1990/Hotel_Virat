@@ -1,69 +1,55 @@
 const PurchaseOrder = require("../model/poModel");
 
-const generateId = (prefix) => {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+// Create a new Purchase Order
+exports.createPO = async (req, res) => {
+  try {
+    const po = new PurchaseOrder(req.body);
+    await po.save();
+    res.status(201).json(po);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
-module.exports = {
-  createPO: async (req, res) => {
-    try {
-      const { vendorId, items, deliveryAddress, paymentTerms } = req.body;
-      const totalAmount = items.reduce(
-        (sum, item) => sum + item.quantity * item.price,
-        0
-      );
-      const po = new PurchaseOrder({
-        poId: generateId("PO"),
-        vendorId,
-        items,
-        totalAmount,
-        deliveryAddress,
-        paymentTerms,
-        status: totalAmount > 100000 ? "pending" : "approved",
-      });
-      await po.save();
-      res.status(201).json(po);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
+// Get all Purchase Orders
+exports.getAllPOs = async (req, res) => {
+  try {
+    const pos = await PurchaseOrder.find().populate("vendorId",'name');
+    res.json(pos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-  approvePO: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const po = await PurchaseOrder.findOneAndUpdate(
-        { poId: id },
-        { status: "approved", approvedBy: "Admin" },
-        { new: true }
-      );
-      if (!po) return res.status(404).json({ message: "PO not found" });
-      res.json(po);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
+// Get a single Purchase Order by ID
+exports.getPOById = async (req, res) => {
+  try {
+    const po = await PurchaseOrder.findById(req.params.id).populate("vendorId",'name');
+    if (!po) return res.status(404).json({ error: "PO not found" });
+    res.json(po);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-  rejectPO: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const po = await PurchaseOrder.findOneAndUpdate(
-        { poId: id },
-        { status: "rejected" },
-        { new: true }
-      );
-      if (!po) return res.status(404).json({ message: "PO not found" });
-      res.json(po);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
+// Update a Purchase Order
+exports.updatePO = async (req, res) => {
+  try {
+    const po = await PurchaseOrder.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!po) return res.status(404).json({ error: "PO not found" });
+    res.json(po);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
 
-  getPOs: async (req, res) => {
-    try {
-      const pos = await PurchaseOrder.find();
-      res.json(pos);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
+// Delete a Purchase Order
+exports.deletePO = async (req, res) => {
+  try {
+    const po = await PurchaseOrder.findByIdAndDelete(req.params.id);
+    if (!po) return res.status(404).json({ error: "PO not found" });
+    res.json({ message: "PO deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
