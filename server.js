@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
 const express = require("express");
-
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -102,6 +101,8 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
+
+//construction
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
@@ -150,17 +151,9 @@ app.use("/hotel/store-location", storeLocationRoutes);
 app.use('/config/roles', roleRoutes);
 app.use("/config/configuration", configurationRoutes);
 app.use("/report", reportRoutes);
- 
 
 
 
-//Construction
-app.use("/construction/leave", leaveRoutes);
-app.use("/construction/site", siteRoutes);
-app.use("/construction/employee", EmployeeRoutes);
-app.use("/construction/attendance", attendanceRoutesConstruction);
-app.use("/construction/payroll", payrollRoutesConstruction);
-app.use("/construction/payslip", payslipRoutes);
 // Define Port
 const PORT = process.env.PORT || 5000;
 
