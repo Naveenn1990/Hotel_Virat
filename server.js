@@ -105,7 +105,24 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 //construction
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
-const reportRoutes = require('./routes/reportRoutes');
+// const reportRoutes = require('./routes/reportRoutes');
+// const leaveRoutes = require('./routes/leaveRoutes');
+const siteRoutes = require('./routes/siteroutes');
+const EmployeeRoutes = require('./routes/employeeRoutes');
+const attendanceRoutesConstruction = require('./routes/attendanceRoutes');
+const payrollRoutesConstruction = require('./routes/payrollRoutes');
+const payslipRoutes = require('./routes/payslipRoutes');
+const vendorRoutes = require('./routes/vendorRoutes');
+const rfqRoutes = require('./routes/rfqRoutes');
+const quotationRoutes = require('./routes/quotationRoutes');
+const poRoutes = require('./routes/poRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
+const grnRoutes = require('./routes/grnRoutes');
+
+
+
+
 
 
 app.use("/hotel/user-auth", userRoutes);
@@ -150,9 +167,24 @@ app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
 app.use('/config/roles', roleRoutes);
 app.use("/config/configuration", configurationRoutes);
-app.use("/report", reportRoutes);
+// app.use("/report", reportRoutes);
 
 
+
+//Construction
+// app.use("/construction/leave", leaveRoutes);
+app.use("/construction/site", siteRoutes);
+app.use("/construction/employee", EmployeeRoutes);
+app.use("/construction/attendance", attendanceRoutesConstruction);
+app.use("/construction/payroll", payrollRoutesConstruction);
+app.use("/construction/payslip", payslipRoutes);
+app.use("/construction/vendor", vendorRoutes);
+app.use("/construction/rfq", rfqRoutes);
+app.use("/construction/quotation", quotationRoutes);
+app.use("/construction/po", poRoutes);
+app.use("/construction/payment", paymentRoutes);
+app.use("/construction/invoice", invoiceRoutes);
+app.use("/construction/grn", grnRoutes);
 
 // Define Port
 const PORT = process.env.PORT || 5000;
