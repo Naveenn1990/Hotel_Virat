@@ -122,7 +122,7 @@ const grnRoutes = require('./routes/grnRoutes');
 
 
 
-
+// hotel Routes
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
 app.use("/hotel/category", categoryRoutes);
@@ -158,7 +158,6 @@ app.use("/hotel/expense", expenseRoutes);
 
 
 // app.use("/hotel/pending", pendingRoutes);
-
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
@@ -166,11 +165,11 @@ app.use("/hotel/store-location", storeLocationRoutes);
 app.use('/config/roles', roleRoutes);
 app.use("/config/configuration", configurationRoutes);
 app.use("/report", reportRoutes);
+    
  
 
-
-
-//Construction
+ 
+// Construction Routes
 app.use("/construction/leave", leaveRoutes);
 app.use("/construction/site", siteRoutes);
 app.use("/construction/employee", EmployeeRoutes);
@@ -186,7 +185,7 @@ app.use("/construction/invoice", invoiceRoutes);
 app.use("/construction/grn", grnRoutes); 
 
 
-// Define Port
+// Define Port  
 const PORT = process.env.PORT || 5000;
 
 // Start the server
