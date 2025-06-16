@@ -1,10 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const poController = require('../controller/poController');
+const poController = require("../controller/poController");
 
-router.get('/', poController.getPOs);
-router.post('/', poController.createPO);
-router.put('/:id/approve', poController.approvePO);
-router.put('/:id/reject', poController.rejectPO);
+router.post("/", poController.createPO);
+router.get("/", poController.getAllPOs);
+router.get("/:id", poController.getPOById);
+router.put("/:id", poController.updatePO);
+router.delete("/:id", poController.deletePO);
 
 module.exports = router;
