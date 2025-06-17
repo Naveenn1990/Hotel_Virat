@@ -8,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-
+  
 // Load environment variables from .env file
 dotenv.config();
 
@@ -105,16 +105,17 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 //construction
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
-// const reportRoutes = require('./routes/reportRoutes');
-// const salesRoutes = require('./routes/salesRoutes');
-// const ClientRoutes = require("./routes/ClientRoutes")
+// const reportRoutes = require('./routes/reportRoutes'); 
+// const salesRoutes = require('./routes/salesRoutes');   
+// const ClientRoutes = require("./routes/ClientRoutes")   
 const constructionClientRoutes = require("./routes/constructionClientRoutes");
 const constructionIndex = require("./routes/constructionIndex");
 const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
 const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
 const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
-const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
+const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -168,7 +169,8 @@ app.use("/construction/construction-Invoice",constructionInvoiceRoutes);
 app.use("/construction/construction-Payment",constructionPaymentRoutes);
 app.use("/construction/construction-Project",constructionProjectRoutes);
 app.use("/construction/construction-Report",constructionReportRoutes);
-app.use("/construction/construction-Settings",constructionSettingsRoutes);
+app.use("/construction/construction-Settings", constructionSettingsRoutes); 
+app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
 
 
 
