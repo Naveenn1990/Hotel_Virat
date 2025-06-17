@@ -115,6 +115,7 @@ const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
 const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
 const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+const constructionWorkOrderRoutes = require("./routes/constructionWorkOrderRoutes")
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -171,6 +172,7 @@ app.use("/construction/construction-Report",constructionReportRoutes);
 app.use("/construction/construction-Settings",constructionSettingsRoutes);
 
 
+app.use("/construction/work-orders", constructionWorkOrderRoutes)
 
 // Define Port
 const PORT = process.env.PORT || 5000;
