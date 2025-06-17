@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 
-const PurchaseOrderConstSchema = new mongoose.Schema(
+const PoSchema = new mongoose.Schema(
   {
-    poId: { type: String, required: true, unique: true },
-    vendorId: String,
-     vendorId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Vendor",
-          required: true,
-        },
+    vendorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
+      required: [true, "Vender ID is required"],
+    },
+
     items: [{ materialName: String, quantity: Number, price: Number }],
     totalAmount: Number,
     approvedBy: String,
@@ -23,4 +22,4 @@ const PurchaseOrderConstSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("PurchaseOrderConst", PurchaseOrderConstSchema);
+module.exports = mongoose.model("PoS", PoSchema);

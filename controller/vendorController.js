@@ -1,60 +1,74 @@
 const Vendor = require('../model/Vendor');
+const asyncHandler = require('express-async-handler');
 
-const generateId = (prefix) => {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-};
+// @desc    Get all vendors
+// @route   GET /api/vendors
+// @access  Public
+const getVendors = asyncHandler(async (req, res) => {
+  const vendors = await Vendor.find();
+  res.status(200).json(vendors);
+});
+
+// @desc    Get vendor by ID
+// @route   GET /api/vendors/:id
+// @access  Public
+const getVendorById = asyncHandler(async (req, res) => {
+  const vendor = await Vendor.findById(req.params.id);
+  if (!vendor) {
+    res.status(404);
+    throw new Error('Vendor not found');
+  }
+  res.status(200).json(vendor);
+});
+
+// @desc    Create new vendor
+// @route   POST /api/vendors
+// @access  Public
+const createVendor = asyncHandler(async (req, res) => {
+  const { name, contact, category, address } = req.body;
+  if (!name || !contact || !category || !address) {
+    res.status(400);
+    throw new Error('All fields are required');
+  }
+  const vendor = await Vendor.create({ name, contact, category, address });
+  res.status(201).json(vendor);
+});
+
+// @desc    Update vendor
+// @route   PUT /api/vendors/:id
+// @access  Public
+const updateVendor = asyncHandler(async (req, res) => {
+  const vendor = await Vendor.findById(req.params.id);
+  if (!vendor) {
+    res.status(404);
+    throw new Error('Vendor not found');
+  }
+  const { name, contact, category, address } = req.body;
+  vendor.name = name || vendor.name;
+  vendor.contact = contact || vendor.contact;
+  vendor.category = category || vendor.category;
+  vendor.address = address || vendor.address;
+  const updatedVendor = await vendor.save();
+  res.status(200).json(updatedVendor);
+});
+
+// @desc    Delete vendor
+// @route   DELETE /api/vendors/:id
+// @access  Public
+const deleteVendor = asyncHandler(async (req, res) => {
+  const vendor = await Vendor.findById(req.params.id);
+  if (!vendor) {
+    res.status(404);
+    throw new Error('Vendor not found');
+  }
+  await vendor.deleteOne();
+  res.status(200).json({ message: 'Vendor deleted' });
+});
 
 module.exports = {
-  addVendor: async (req, res) => {
-    try {
-      const { vendorName, GST, contactInfo, bankDetails, address } = req.body;
-      const vendor = new Vendor({
-        vendorId: generateId('VEND'),
-        vendorName,
-        GST,
-        contactInfo,
-        bankDetails,
-        address
-      });
-      await vendor.save();
-      res.status(201).json(vendor);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  updateVendor: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const updatedVendor = await Vendor.findOneAndUpdate(
-        { vendorId: id },
-        req.body,
-        { new: true }
-      );
-      if (!updatedVendor) return res.status(404).json({ message: 'Vendor not found' });
-      res.json(updatedVendor);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  deleteVendor: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const vendor = await Vendor.findOneAndDelete({ vendorId: id });
-      if (!vendor) return res.status(404).json({ message: 'Vendor not found' });
-      res.json({ message: 'Vendor deleted' });
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  getVendors: async (req, res) => {
-    try {
-      const vendors = await Vendor.find();
-      res.json(vendors);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  }
+  getVendors,
+  getVendorById,
+  createVendor,
+  updateVendor,
+  deleteVendor,
 };

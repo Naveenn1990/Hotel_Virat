@@ -1,10 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const vendorController = require('../controller/vendorController');
+const {
+  getVendors,
+  getVendorById,
+  createVendor,
+  updateVendor,
+  deleteVendor,
+} = require('../controller/vendorController');
 
-router.get('/getall', vendorController.getVendors);
-router.post('/', vendorController.addVendor);
-router.put('/:id', vendorController.updateVendor);
-router.delete('/:id', vendorController.deleteVendor);
+router.route('/')
+  .get(getVendors)
+  .post(createVendor);
+
+router.route('/:id')
+  .get(getVendorById)
+  .put(updateVendor)
+  .delete(deleteVendor);
 
 module.exports = router;

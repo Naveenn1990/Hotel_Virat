@@ -1,21 +1,26 @@
 const mongoose = require('mongoose');
 
-const VendorSchema = new mongoose.Schema({
-  vendorId: { type: String, required: true, unique: true },
-  vendorName: { type: String, required: true },
-  GST: String,
-  contactInfo: {
-    email: String,
-    phone: String,
-    contactPerson: String
+const vendorSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Vendor name is required'],
+    trim: true,
   },
-  Category: String,
-  bankDetails: {
-    accountNumber: String,
-    IFSC: String,
-    bankName: String
+  contact: {
+    type: String,
+    required: [true, 'Contact email is required'],
+    match: [/.+\@.+\..+/, 'Please enter a valid email'],
   },
-  address: String,
+  category: {
+    type: String,
+    required: [true, 'Category is required'],
+    trim: true,
+  },
+  address: {
+    type: String,
+    required: [true, 'Address is required'],
+    trim: true,
+  },
 }, { timestamps: true });
 
-module.exports = mongoose.model('Vendor', VendorSchema);
+module.exports = mongoose.model('Vendor', vendorSchema);
