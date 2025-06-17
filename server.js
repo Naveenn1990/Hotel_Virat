@@ -116,7 +116,7 @@ const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
 const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
 
-
+// hotel Routes
 app.use("/hotel/user-auth", userRoutes);
 app.use("/hotel/branch", branchRoutes);
 app.use("/hotel/category", categoryRoutes);
@@ -152,7 +152,6 @@ app.use("/hotel/expense", expenseRoutes);
 
 
 // app.use("/hotel/pending", pendingRoutes);
-
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
@@ -179,4 +178,4 @@ const PORT = process.env.PORT || 5000;
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});   
+});
