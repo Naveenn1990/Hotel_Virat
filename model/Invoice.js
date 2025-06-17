@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
 const InvoiceSchema = new mongoose.Schema({
-  invoiceId: { type: String, required: true, unique: true },
-  poId: String,
-  vendorId: String,
+  poId: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseOrder' },
+  vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' },
   amount: Number,
   dueDate: Date,
   paymentStatus: { type: String, enum: ['unpaid', 'paid'], default: 'unpaid' },

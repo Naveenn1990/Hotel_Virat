@@ -5,17 +5,12 @@ const {
   getRole,
   createRole,
   updateRole,
-  deleteRole
+  deleteRole,
 } = require("../controller/roleController");
 
 // Routes
-router.route("/")
-  .get(getRoles)
-  .post(createRole);
+router.route("/").get(getRoles).post(createRole);
 
-router.route("/:id")
-  .get(getRole)
-  .put(updateRole)
-  .delete(deleteRole);
+router.route("/:id").get(getRole).put(updateRole).delete(deleteRole);
 
 module.exports = router;
