@@ -9,7 +9,7 @@ const {
 } = require('../controller/supervisorexpenseController');
 
 
-router.route('/')
+router.route('/getall')
     .get(getExpenses)
     .post(createExpense);
 

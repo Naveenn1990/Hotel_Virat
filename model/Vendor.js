@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const VendorSchema = new mongoose.Schema({
-//   vendorId: { type: String, required: true, unique: true },
+  vendorId: { type: String, required: true, unique: true },
   vendorName: { type: String, required: true },
   GST: String,
   contactInfo: {
