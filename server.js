@@ -121,6 +121,8 @@ const attendanceRoutes = require ("./routes/attendanceRoutes")
 const poRoutes = require ("./routes/poRoutes");
 const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
+const attendanceConsRoutes = require ("./routes/attendanceRoutesConstruction");
+const PayslipCons = require("./routes/payslipRoutes");
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -154,6 +156,7 @@ app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+app.use("/hotel/attendance",attendanceRoutes);
 
 
 
@@ -171,7 +174,7 @@ app.use("/config/leave",leaveRoutes);
 // app.use("/construction/ClientRoutes",ClientRoutes)
 app.use("/construction/client",constructionClientRoutes);
 app.use("/construction/index",constructionIndex);
-app.use("/config/attendance",attendanceRoutes);
+
 
 app.use("/construction/Invoice",constructionInvoiceRoutes);
 app.use("/construction/Payment",constructionPaymentRoutes);
@@ -181,6 +184,9 @@ app.use("/construction/Settings",constructionSettingsRoutes);
 app.use("/costruction/po", poRoutes);
 app.use("/costruction/vendor",Vendor);
 app.use("/construction/purchaseCons",PurchaseCons);
+app.use("/construction/attendanceCons", attendanceConsRoutes)
+app.use("/construction/payslipcons",PayslipCons);
+
 
 
 
