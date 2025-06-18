@@ -105,6 +105,10 @@ const storeLocationRoutes = require("./routes/storeLocationRoutes");
 //construction
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
+const employeeRoutes = require("./routes/employeeRoutes")
+// const reportRoutes = require('./routes/reportRoutes');
+// const salesRoutes = require('./routes/salesRoutes');
+// const ClientRoutes = require("./routes/ClientRoutes")
 // const reportRoutes = require('./routes/reportRoutes'); 
 // const salesRoutes = require('./routes/salesRoutes');   
 // const ClientRoutes = require("./routes/ClientRoutes")   
@@ -114,6 +118,12 @@ const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
 const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
 const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
+const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+const leaveRoutes = require("./routes/leaveRoutes")
+const attendanceRoutes = require ("./routes/attendanceRoutes")
+const poRoutes = require ("./routes/poRoutes");
+const Vendor = require ("./routes/vendorRoutes");
+const PurchaseCons = require("./routes/purchaseConsRoutes");
 const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
 const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
 
@@ -149,21 +159,38 @@ app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
- 
 
 
-// app.use("/hotel/pending", pendingRoutes);
+
+// Construction
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
 app.use('/config/roles', roleRoutes);
 app.use("/config/configuration", configurationRoutes);
+app.use("/config/employee", employeeRoutes);
+app.use("/config/leave",leaveRoutes);
 // app.use("/report", reportRoutes);
 // app.use("/construction/sales", salesRoutes);
 // app.use("/construction/ClientRoutes",ClientRoutes)
 app.use("/construction/client",constructionClientRoutes);
 app.use("/construction/index",constructionIndex);
+app.use("/config/attendance",attendanceRoutes);
+
+app.use("/construction/Invoice",constructionInvoiceRoutes);
+app.use("/construction/Payment",constructionPaymentRoutes);
+app.use("/construction/Project",constructionProjectRoutes);
+app.use("/construction/Report",constructionReportRoutes);
+app.use("/construction/Settings",constructionSettingsRoutes);
+app.use("/costruction/po", poRoutes);
+app.use("/costruction/vendor",Vendor);
+app.use("/construction/purchaseCons",PurchaseCons);
+
+
+
+
+app.use("/construction/work-orders", constructionWorkOrderRoutes)
 
 app.use("/construction/construction-Invoice",constructionInvoiceRoutes);
 app.use("/construction/construction-Payment",constructionPaymentRoutes);
