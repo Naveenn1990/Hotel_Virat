@@ -11,7 +11,7 @@ const {
 } = require("../controller/constructionPaymentController")
 
 // @route   GET /api/construction/sales/payments
-router.get("/", getConstructionPayments)
+router.get("/getall", getConstructionPayments)
 
 // @route   GET /api/construction/sales/payments/stats
 router.get("/stats", getConstructionPaymentStats)

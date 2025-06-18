@@ -4,7 +4,7 @@ const {
     getExpenses,
     createExpense,
     updateExpenseStatus,
-    getExpenseById,
+
     getExpenseStats
 } = require('../controller/supervisorexpenseController');
 
@@ -16,8 +16,7 @@ router.route('/getall')
 router.route('/stats')
     .get(getExpenseStats);
 
-router.route('/:id')
-    .get(getExpenseById);
+
 
 router.route('/:id/status')
     .put(updateExpenseStatus);
