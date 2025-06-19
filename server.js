@@ -8,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-
+  
 // Load environment variables from .env file
 dotenv.config();
 
@@ -110,6 +110,9 @@ const employeeRoutes = require("./routes/employeeRoutes")
 // const reportRoutes = require('./routes/reportRoutes');
 // const salesRoutes = require('./routes/salesRoutes');
 // const ClientRoutes = require("./routes/ClientRoutes")
+// const reportRoutes = require('./routes/reportRoutes'); 
+// const salesRoutes = require('./routes/salesRoutes');   
+// const ClientRoutes = require("./routes/ClientRoutes")   
 const constructionClientRoutes = require("./routes/constructionClientRoutes");
 const constructionIndex = require("./routes/constructionIndex");
 const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
@@ -123,7 +126,8 @@ const attendanceRoutes = require ("./routes/attendanceRoutes")
 const poRoutes = require ("./routes/poRoutes");
 const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
-const indentRoutes = require("./routes/indentRoutes");
+const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
+const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -157,6 +161,7 @@ app.use("/hotel/raw-material", rawMaterialRoutes);
 app.use("/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/hotel/reservation", reservationRoutes);
 app.use("/hotel/expense", expenseRoutes);
+app.use("/hotel/attendance",attendanceRoutes);
 
 
 
@@ -174,7 +179,7 @@ app.use("/config/leave",leaveRoutes);
 // app.use("/construction/ClientRoutes",ClientRoutes)
 app.use("/construction/client",constructionClientRoutes);
 app.use("/construction/index",constructionIndex);
-app.use("/config/attendance",attendanceRoutes);
+
 
 app.use("/construction/Invoice",constructionInvoiceRoutes);
 app.use("/construction/Payment",constructionPaymentRoutes);
@@ -184,8 +189,21 @@ app.use("/construction/Settings",constructionSettingsRoutes);
 app.use("/costruction/po", poRoutes);
 app.use("/costruction/vendor",Vendor);
 app.use("/construction/purchaseCons",PurchaseCons);
-app.use("/construction/work-orders", constructionWorkOrderRoutes);
-app.use("/construction/indents",indentRoutes) // Changed from "/construction/indent",indentRoutes) to "/construction/indents",indentRoutes) for consistency with the API endpoint name
+app.use("/construction/attendanceCons", attendanceConsRoutes)
+app.use("/construction/payslipcons",PayslipCons);
+
+
+
+
+
+app.use("/construction/work-orders", constructionWorkOrderRoutes)
+
+app.use("/construction/construction-Invoice",constructionInvoiceRoutes);
+app.use("/construction/construction-Payment",constructionPaymentRoutes);
+app.use("/construction/construction-Project",constructionProjectRoutes);
+app.use("/construction/construction-Report",constructionReportRoutes);
+app.use("/construction/construction-Settings", constructionSettingsRoutes); 
+app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
 
 
 

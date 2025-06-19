@@ -1,17 +1,12 @@
 const Vendor = require('../model/Vendor');
 const asyncHandler = require('express-async-handler');
 
-// @desc    Get all vendors
-// @route   GET /api/vendors
-// @access  Public
+
 const getVendors = asyncHandler(async (req, res) => {
   const vendors = await Vendor.find();
   res.status(200).json(vendors);
 });
 
-// @desc    Get vendor by ID
-// @route   GET /api/vendors/:id
-// @access  Public
 const getVendorById = asyncHandler(async (req, res) => {
   const vendor = await Vendor.findById(req.params.id);
   if (!vendor) {
@@ -21,9 +16,10 @@ const getVendorById = asyncHandler(async (req, res) => {
   res.status(200).json(vendor);
 });
 
-// @desc    Create new vendor
-// @route   POST /api/vendors
-// @access  Public
+
+// @desc  Create new vendor
+// @route POST /api/vendors
+// @access Public
 const createVendor = asyncHandler(async (req, res) => {
   const { name, contact, category, address } = req.body;
   if (!name || !contact || !category || !address) {
@@ -34,9 +30,7 @@ const createVendor = asyncHandler(async (req, res) => {
   res.status(201).json(vendor);
 });
 
-// @desc    Update vendor
-// @route   PUT /api/vendors/:id
-// @access  Public
+
 const updateVendor = asyncHandler(async (req, res) => {
   const vendor = await Vendor.findById(req.params.id);
   if (!vendor) {
@@ -52,9 +46,7 @@ const updateVendor = asyncHandler(async (req, res) => {
   res.status(200).json(updatedVendor);
 });
 
-// @desc    Delete vendor
-// @route   DELETE /api/vendors/:id
-// @access  Public
+
 const deleteVendor = asyncHandler(async (req, res) => {
   const vendor = await Vendor.findById(req.params.id);
   if (!vendor) {

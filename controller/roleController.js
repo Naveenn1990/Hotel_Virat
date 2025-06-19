@@ -1,17 +1,13 @@
 const Role = require('../model/roleModel');
 const asyncHandler = require('express-async-handler');
 
-// @desc    Get all roles
-// @route   GET /api/roles
-// @access  Public
+
 const getRoles = asyncHandler(async (req, res) => {
   const roles = await Role.find();
   res.status(200).json(roles);
 });
 
-// @desc    Get single role
-// @route   GET /api/roles/:id
-// @access  Public
+
 const getRole = asyncHandler(async (req, res) => {
   const role = await Role.findById(req.params.id);
   
@@ -23,9 +19,7 @@ const getRole = asyncHandler(async (req, res) => {
   res.status(200).json(role);
 });
 
-// @desc    Create new role
-// @route   POST /api/roles
-// @access  Private
+
 const createRole = asyncHandler(async (req, res) => {
   const { 
     name, 
@@ -59,9 +53,7 @@ const createRole = asyncHandler(async (req, res) => {
   res.status(201).json(role);
 });
 
-// @desc    Update role
-// @route   PUT /api/roles/:id
-// @access  Private
+
 const updateRole = asyncHandler(async (req, res) => {
   const role = await Role.findById(req.params.id);
 
@@ -101,9 +93,7 @@ const updateRole = asyncHandler(async (req, res) => {
   res.status(200).json(updatedRole);
 });
 
-// @desc    Delete role
-// @route   DELETE /api/roles/:id
-// @access  Private
+
 const deleteRole = asyncHandler(async (req, res) => {
   const role = await Role.findById(req.params.id);
 
