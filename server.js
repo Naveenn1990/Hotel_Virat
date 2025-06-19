@@ -102,6 +102,7 @@ const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
 
+
 //construction
 const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
@@ -116,11 +117,13 @@ const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
 const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
 const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+const constructionWorkOrderRoutes = require("./routes/constructionWorkOrderRoutes")
 const leaveRoutes = require("./routes/leaveRoutes")
 const attendanceRoutes = require ("./routes/attendanceRoutes")
 const poRoutes = require ("./routes/poRoutes");
 const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
+const indentRoutes = require("./routes/indentRoutes");
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -181,11 +184,10 @@ app.use("/construction/Settings",constructionSettingsRoutes);
 app.use("/costruction/po", poRoutes);
 app.use("/costruction/vendor",Vendor);
 app.use("/construction/purchaseCons",PurchaseCons);
+app.use("/construction/work-orders", constructionWorkOrderRoutes);
+app.use("/construction/indents",indentRoutes) // Changed from "/construction/indent",indentRoutes) to "/construction/indents",indentRoutes) for consistency with the API endpoint name
 
 
-
-
-app.use("/construction/work-orders", constructionWorkOrderRoutes)
 
 // Define Port
 const PORT = process.env.PORT || 5000;
