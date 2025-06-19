@@ -1,6 +1,7 @@
 const User = require('../model/userModel');
 const fs = require('fs');
 const path = require('path');
+const { uploadFile2, deleteFile } = require('../middleware/AWS');
 
 // Generate a 6-digit OTP
 const generateOtp = () => {
@@ -111,7 +112,7 @@ exports.verifyOtp = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { name, mobile } = req.body;
-    const image = req.file ? req.file.path : null;
+    const image = req.file ? await uploadFile2(req.file,"user") : null;
 
     const user = new User({
       name,
@@ -200,14 +201,12 @@ exports.updateUser = async (req, res) => {
 
     // If a new image is uploaded, update the image path and delete the old image
     if (req.file) {
-      updateData.image = req.file.path;
+      updateData.image =await uploadFile2(req.file, "user");
 
       // Find the user to get the old image path
       const user = await User.findById(req.params.id);
       if (user.image) {
-        fs.unlink(path.join(__dirname, '..', user.image), (err) => {
-          if (err) console.error('Error deleting old image:', err);
-        });
+       await deleteFile(user.image);
       }
     }
 

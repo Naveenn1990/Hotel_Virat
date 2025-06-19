@@ -50,21 +50,21 @@ app.use(
 );
 
 // Create upload directories if they don't exist
-const createDirIfNotExists = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Directory created: ${dirPath}`);
-  }
-};
+// const createDirIfNotExists = (dirPath) => {
+//   if (!fs.existsSync(dirPath)) {
+//     fs.mkdirSync(dirPath, { recursive: true });
+//     console.log(`Directory created: ${dirPath}`);
+//   }
+// };
 
-createDirIfNotExists("uploads");
-createDirIfNotExists("uploads/profile");
-createDirIfNotExists("uploads/category");
-createDirIfNotExists("uploads/menu");
-createDirIfNotExists("uploads/offer");
+// createDirIfNotExists("uploads");
+// createDirIfNotExists("uploads/profile");
+// createDirIfNotExists("uploads/category");
+// createDirIfNotExists("uploads/menu");
+// createDirIfNotExists("uploads/offer");
 
 // Serve static files from the "uploads" directory
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
 
 // MongoDB Connection
 mongoose
@@ -150,7 +150,7 @@ app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
 
 // Define Port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9000;
 
 // Start the server
 app.listen(PORT, () => {

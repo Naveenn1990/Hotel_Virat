@@ -1,3 +1,4 @@
+const { uploadFile2, deleteFile } = require("../middleware/AWS");
 const Expense = require("../model/Expense");
 
 exports.createExpense = async (req, res) => {
@@ -5,11 +6,7 @@ exports.createExpense = async (req, res) => {
         const { purpose, amount, date, branchId } = req.body;
         let slip = null;
         if (req.file) {
-            slip = {
-                name: req.file.originalname,
-                size: req.file.size,
-                url: `/uploads/expenses/${req.file.filename}`,
-            };
+            slip = await uploadFile2(req.file, "expenses");
         } else if (req.body.slip) {
             slip = req.body.slip;
         }
@@ -61,6 +58,9 @@ exports.deleteExpense = async (req, res) => {
     try {
         const expense = await Expense.findByIdAndDelete(req.params.id);
         if (!expense) return res.status(404).json({ message: "Expense not found" });
+        if (expense.slip) {
+            await deleteFile(expense.slip); // Delete the file from storage
+        }
         res.json({ message: "Expense deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });
