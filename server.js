@@ -119,7 +119,7 @@ const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
 const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
 const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
 const constructionReportRoutes = require("./routes/constructionReportRoutes");
-const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+// const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
 const constructionWorkOrderRoutes = require("./routes/constructionWorkOrderRoutes")
 const leaveRoutes = require("./routes/leaveRoutes")
 const attendanceRoutes = require ("./routes/attendanceRoutes")
@@ -128,6 +128,10 @@ const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
 const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
 const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
+const attendanceConsRoutes = require("./routes/attendanceRoutesConstruction");
+const PayslipCons = require("./routes/payslipRoutes");
+const indentRoutes = require("./routes/indentRoutes");
+const inventoryItemRoutes = require('./routes/inventoryItemRoutes');
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -204,7 +208,8 @@ app.use("/construction/construction-Project",constructionProjectRoutes);
 app.use("/construction/construction-Report",constructionReportRoutes);
 app.use("/construction/construction-Settings", constructionSettingsRoutes); 
 app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
-
+app.use("/construction/indents",indentRoutes)
+app.use('/construction/inventory', inventoryItemRoutes);
 
 
 // Define Port
