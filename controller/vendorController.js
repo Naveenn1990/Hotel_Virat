@@ -21,9 +21,9 @@ const getVendorById = asyncHandler(async (req, res) => {
   res.status(200).json(vendor);
 });
 
-// @desc    Create new vendor
-// @route   POST /api/vendors
-// @access  Public
+// @desc  Create new vendor
+// @route POST /api/vendors
+// @access Public
 const createVendor = asyncHandler(async (req, res) => {
   const { name, contact, category, address } = req.body;
   if (!name || !contact || !category || !address) {

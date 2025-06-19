@@ -124,8 +124,9 @@ const attendanceRoutes = require ("./routes/attendanceRoutes")
 const poRoutes = require ("./routes/poRoutes");
 const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
-const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
-const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
+// const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
+const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");   
+const constructionWorkOrderRoutes =require("./routes/constructionWorkOrderRoutes")
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
