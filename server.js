@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS for all routes
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:9000','https://hotelvirat.com'] })); // Vite dev aur production
+app.use(cors({ origin: ['http://localhost:5173', 'https://hotelvirat.s3.amazonaws.com','https://hotelvirat.com'] })); // Vite dev aur production
 
 // Define the rate limiter
 const limiter = rateLimit({
@@ -32,24 +32,25 @@ app.use(limiter);
 
 // Use morgan for logging
 app.use(morgan("dev"));
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "img-src": [
-          "'self'",
-          "data:",
-          "http://localhost:3000",
-          "http://localhost:5173",
-          "https://hotelvirat.com",
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       useDefaults: true,
+//       directives: {
+//         "img-src": [
+//           "'self'",
+//           "data:",
+//           "http://localhost:3000",
+//           "http://localhost:5173",
+//           "https://hotelvirat.com",
+//           "https://hotelvirat.s3.amazonaws.com"
     
-        ],
-      },
-    },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
+//         ],
+//       },
+//     },
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//   })
+// );
 
 // Create upload directories if they don't exist
 // const createDirIfNotExists = (dirPath) => {
