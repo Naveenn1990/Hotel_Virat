@@ -12,11 +12,11 @@ const {
 } = require("../controller/branchController")
 
 // Ensure upload directory exists
-const uploadDir = path.join(__dirname, "..", "uploads", "branch")
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true })
-  console.log("Created upload directory:", uploadDir)
-}
+// const uploadDir = path.join(__dirname, "..", "uploads", "branch")
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir, { recursive: true })
+//   console.log("Created upload directory:", uploadDir)
+// }
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({

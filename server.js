@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS for all routes
-app.use(cors());
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:9000'] })); // Vite dev aur production
 
 // Define the rate limiter
 const limiter = rateLimit({
@@ -32,22 +32,22 @@ app.use(limiter);
 
 // Use morgan for logging
 app.use(morgan("dev"));
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "img-src": [
-          "'self'",
-          "data:",
-          "http://localhost:3000",
-          "http://localhost:3001",
-        ],
-      },
-    },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       useDefaults: true,
+//       directives: {
+//         "img-src": [
+//           "'self'",
+//           "data:",
+//           "http://localhost:3000",
+//           "http://localhost:3001",
+//         ],
+//       },
+//     },
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//   })
+// );
 
 // Create upload directories if they don't exist
 // const createDirIfNotExists = (dirPath) => {
@@ -73,6 +73,7 @@ mongoose
   .catch((err) => console.log("Error: ", err));
 
 // Use Routes
+
 const userRoutes = require("./routes/userRoutes");
 const branchRoutes = require("./routes/branchRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -149,8 +150,19 @@ app.use("/hotel/product-submission", productSubmissionRoutes);
 app.use("/hotel/stock", stockRoutes);
 app.use("/hotel/store-location", storeLocationRoutes);
 
-// Define Port
 const PORT = process.env.PORT || 9000;
+
+// app.use(express.static(path.join(__dirname, './build'))); // Change 'dist' to your frontend folder if needed
+
+// Redirect all requests to the index.html file
+
+// app.get('/*', (req, res) => {
+//   return res.sendFile(path.join(__dirname, './build', 'index.html'));
+// });
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the Hotel Management API");
+});
 
 // Start the server
 app.listen(PORT, () => {
