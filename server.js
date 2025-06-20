@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS for all routes
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:9000'] })); // Vite dev aur production
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:9000','https://hotelvirat.com'] })); // Vite dev aur production
 
 // Define the rate limiter
 const limiter = rateLimit({
@@ -32,22 +32,24 @@ app.use(limiter);
 
 // Use morgan for logging
 app.use(morgan("dev"));
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       useDefaults: true,
-//       directives: {
-//         "img-src": [
-//           "'self'",
-//           "data:",
-//           "http://localhost:3000",
-//           "http://localhost:3001",
-//         ],
-//       },
-//     },
-//     crossOriginResourcePolicy: { policy: "cross-origin" },
-//   })
-// );
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "img-src": [
+          "'self'",
+          "data:",
+          "http://localhost:3000",
+          "http://localhost:5173",
+          "https://hotelvirat.com",
+    
+        ],
+      },
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 // Create upload directories if they don't exist
 // const createDirIfNotExists = (dirPath) => {
@@ -156,7 +158,7 @@ app.use(express.static(path.join(__dirname, 'build'))); // Change 'dist' to your
 
 // Redirect all requests to the index.html file
 // 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
