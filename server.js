@@ -124,13 +124,12 @@ const attendanceRoutes = require ("./routes/attendanceRoutes")
 const poRoutes = require ("./routes/poRoutes");
 const Vendor = require ("./routes/vendorRoutes");
 const PurchaseCons = require("./routes/purchaseConsRoutes");
-<<<<<<< HEAD
-const attendanceConsRoutes = require ("./routes/attendanceRoutesConstruction");
-const PayslipCons = require("./routes/payslipRoutes");
-=======
-const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");     
+const constructionWorkOrderRoutes = require("./routes/constructionSettingsRoutes");     
+const attendanceConsRoutes = require ("./routes/attendanceRoutesConstruction")
 const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
->>>>>>> e0f20a1fd22e7d23d036c859f2a81b66d48ec987
+const PayslipCons = require ("./routes/payslipRoutes")
+const PayrollCons = require ("./routes/payrollRoutesConstruction")
+
 
 // hotel Routes
 app.use("/hotel/user-auth", userRoutes);
@@ -207,6 +206,7 @@ app.use("/construction/construction-Project",constructionProjectRoutes);
 app.use("/construction/construction-Report",constructionReportRoutes);
 app.use("/construction/construction-Settings", constructionSettingsRoutes); 
 app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
+app.use("/construction/PayrollCons",PayrollCons);
 
 
 

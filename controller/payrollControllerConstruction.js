@@ -1,4 +1,4 @@
-const Payroll = require('../model/Payroll');
+const Payroll = require('../model/Payrollconstruction');
 
 exports.generatePayroll = async (req, res) => {
     try {
