@@ -2,6 +2,7 @@ const Branch = require("../model/Branch")
 const asyncHandler = require("express-async-handler")
 const fs = require("fs")
 const path = require("path")
+const { uploadFile2, deleteFile } = require("../middleware/AWS")
 
 // Ensure upload directory exists
 const ensureUploadDir = () => {
@@ -18,7 +19,7 @@ const createBranch = asyncHandler(async (req, res) => {
     console.log("Request file:", req.file)
 
     // Ensure upload directory exists
-    ensureUploadDir()
+    // ensureUploadDir()
 
     if (!req.body) {
       res.status(400)
@@ -26,7 +27,7 @@ const createBranch = asyncHandler(async (req, res) => {
     }
 
     const { name, address } = req.body
-    const image = req.file ? req.file.path : null
+    const image = req.file ? await uploadFile2(req.file,"branch") : null
 
     if (!name || !address) {
       res.status(400)
@@ -79,7 +80,7 @@ const updateBranch = asyncHandler(async (req, res) => {
     console.log("Update request file:", req.file)
 
     // Ensure upload directory exists
-    ensureUploadDir()
+    // ensureUploadDir()
 
     if (!req.body) {
       res.status(400)
@@ -94,17 +95,8 @@ const updateBranch = asyncHandler(async (req, res) => {
 
     // If a new image is uploaded, update the image path and delete the old image
     if (req.file) {
-      updateData.image = req.file.path
-
+      updateData.image = req.file ? await uploadFile2(req.file, "branch") : null
       // Find the branch to get the old image path
-      const branch = await Branch.findById(req.params.id)
-      if (branch && branch.image) {
-        const oldImagePath = path.join(__dirname, "..", branch.image)
-        fs.unlink(oldImagePath, (err) => {
-          if (err) console.error("Error deleting old image:", err)
-          else console.log("Old image deleted successfully")
-        })
-      }
     }
 
     const updatedBranch = await Branch.findByIdAndUpdate(req.params.id, updateData, {
@@ -139,11 +131,7 @@ const deleteBranch = asyncHandler(async (req, res) => {
 
     // Delete the associated image file
     if (branch.image) {
-      const imagePath = path.join(__dirname, "..", branch.image)
-      fs.unlink(imagePath, (err) => {
-        if (err) console.error("Error deleting image:", err)
-        else console.log("Image deleted successfully")
-      })
+      await deleteFile(branch.image)
     }
 
     await Branch.deleteOne({ _id: req.params.id })
