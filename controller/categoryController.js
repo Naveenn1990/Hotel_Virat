@@ -1,6 +1,7 @@
 const Category = require('../model/Category');
 const fs = require('fs');
 const path = require('path');
+const { uploadFile2, deleteFile } = require('../middleware/AWS');
 
 // Create a new category
 exports.createCategory = async (req, res) => {
@@ -13,7 +14,7 @@ exports.createCategory = async (req, res) => {
       return res.status(400).json({ message: 'Category with this name already exists for this branch' });
     }
 
-    const image = req.file ? req.file.path : null;
+    const image = req.file ? await  uploadFile2(req.file,"category") : null;
 
     const category = new Category({
       name,
@@ -64,14 +65,12 @@ exports.updateCategory = async (req, res) => {
 
     // If a new image is uploaded, update the image path and delete the old image
     if (req.file) {
-      updateData.image = req.file.path;
+      updateData.image = req.file ? await uploadFile2(req.file, "category") : null;
 
       // Find the category to get the old image path
       const category = await Category.findById(req.params.id);
       if (category && category.image) {
-        fs.unlink(path.join(__dirname, '..', category.image), (err) => {
-          if (err) console.error('Error deleting old image:', err);
-        });
+      await deleteFile(category.image);
       }
     }
 
@@ -100,9 +99,7 @@ exports.deleteCategory = async (req, res) => {
 
     // Delete the associated image file
     if (category.image) {
-      fs.unlink(path.join(__dirname, '..', category.image), (err) => {
-        if (err) console.error('Error deleting image:', err);
-      });
+      await deleteFile(category.image);
     }
 
     await Category.findByIdAndDelete(req.params.id);

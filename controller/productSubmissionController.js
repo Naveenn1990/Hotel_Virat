@@ -1,3 +1,4 @@
+const { deleteFile, uploadFile2 } = require("../middleware/AWS")
 const ProductSubmission = require("../model/ProductSubmission")
 const PurchaseUser = require("../model/PurchaseUser")
 const fs = require("fs")
@@ -426,16 +427,14 @@ exports.uploadQRCode = async (req, res) => {
 
     // Delete old QR code if exists
     if (submission.qrCodeUri) {
-      const oldPath = path.join(__dirname, "..", submission.qrCodeUri)
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath)
-      }
+     await deleteFile(submission.qrCodeUri); // Assuming deleteFile is a function to delete files
     }
 
+    let qrCodeUri=await uploadFile2(req.file, "qr_codes")
     const updatedSubmission = await ProductSubmission.findOneAndUpdate(
       { submissionId },
       {
-        qrCodeUri: req.file.path,
+        qrCodeUri: qrCodeUri,
         status: "qr_uploaded",
         updatedAt: new Date(),
       },
@@ -522,26 +521,17 @@ exports.deleteSubmission = async (req, res) => {
 
     // Delete QR code file if exists
     if (submission.qrCodeUri) {
-      const qrPath = path.join(__dirname, "..", submission.qrCodeUri)
-      if (fs.existsSync(qrPath)) {
-        fs.unlinkSync(qrPath)
-      }
+     await deleteFile(submission.qrCodeUri); // Assuming deleteFile is a function to delete files
     }
 
     // Delete payment image file if exists
     if (submission.paymentImageUri) {
-      const paymentPath = path.join(__dirname, "..", submission.paymentImageUri)
-      if (fs.existsSync(paymentPath)) {
-        fs.unlinkSync(paymentPath)
-      }
+   await deleteFile(submission.paymentImageUri); // Assuming deleteFile is a function to delete files
     }
 
     // Delete bill image file if exists
     if (submission.billImageUri) {
-      const billPath = path.join(__dirname, "..", submission.billImageUri)
-      if (fs.existsSync(billPath)) {
-        fs.unlinkSync(billPath)
-      }
+     await deleteFile(submission.billImageUri); // Assuming deleteFile is a function to delete files
     }
 
     await ProductSubmission.findOneAndDelete({ submissionId })
@@ -629,16 +619,13 @@ exports.uploadPaymentImage = async (req, res) => {
 
     // Delete old payment image if exists
     if (submission.paymentImageUri) {
-      const oldPath = path.join(__dirname, "..", submission.paymentImageUri)
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath)
-      }
+  await deleteFile(submission.paymentImageUri); // Assuming deleteFile is a function to delete files
     }
-
+    const paymentImageUri = await uploadFile2(req.file, "payment_images")
     const updatedSubmission = await ProductSubmission.findByIdAndUpdate(
       submissionId,
       {
-        paymentImageUri: req.file.path,
+        paymentImageUri: paymentImageUri,
         status: "payment_uploaded",
         paymentStatus: "successful",
         paymentUploadedAt: new Date(),
@@ -691,16 +678,14 @@ exports.uploadBillImage = async (req, res) => {
 
     // Delete old bill image if exists
     if (submission.billImageUri) {
-      const oldPath = path.join(__dirname, "..", submission.billImageUri)
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath)
-      }
+    await deleteFile(submission.billImageUri); // Assuming deleteFile is a function to delete files
     }
 
+    const billImageUri = await uploadFile2(req.file, "bill_images")
     const updatedSubmission = await ProductSubmission.findByIdAndUpdate(
       submissionId,
       {
-        billImageUri: req.file.path,
+        billImageUri: billImageUri,
         status: "bill_uploaded",
         billUploadedAt: new Date(),
         updatedAt: new Date(),
