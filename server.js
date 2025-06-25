@@ -112,19 +112,18 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
-<<<<<<< HEAD
 
 //construction
-const roleRoutes = require('./routes/roleRoutes');
+/* const roleRoutes = require('./routes/roleRoutes');
 const configurationRoutes = require('./routes/configurationRoutes');
-const employeeRoutes = require("./routes/employeeRoutes")
+const employeeRoutes = require("./routes/employeeRoutes") */
 // const reportRoutes = require('./routes/reportRoutes');
 // const salesRoutes = require('./routes/salesRoutes');
 // const ClientRoutes = require("./routes/ClientRoutes")
 // const reportRoutes = require('./routes/reportRoutes'); 
 // const salesRoutes = require('./routes/salesRoutes');   
 // const ClientRoutes = require("./routes/ClientRoutes")   
-const constructionClientRoutes = require("./routes/constructionClientRoutes");
+/* const constructionClientRoutes = require("./routes/constructionClientRoutes");
 const constructionIndex = require("./routes/constructionIndex");
 const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
 const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
@@ -141,10 +140,7 @@ const attendanceConsRoutes = require ("./routes/attendanceRoutesConstruction")
 const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
 const PayslipCons = require ("./routes/payslipRoutes")
 const PayrollCons = require ("./routes/payrollRoutesConstruction")
-
-=======
-const attendanceRoutes = require("./routes/attendanceRoutes");
->>>>>>> 886543035ca2c78617358a0d2a11d9e597764df2
+ */
 
 // hotel Routes
 app.use("/api/v1/hotel/user-auth", userRoutes);
@@ -178,7 +174,7 @@ app.use("/api/v1/hotel/raw-material", rawMaterialRoutes);
 app.use("/api/v1/hotel/grn", goodsReceiptNoteRoutes);
 app.use("/api/v1/hotel/reservation", reservationRoutes);
 app.use("/api/v1/hotel/expense", expenseRoutes);
-app.use("/api/v1/hotel/attendance", attendanceRoutes);
+/* app.use("/api/v1/hotel/attendance", attendanceRoutes); */
 
 app.use("/api/v1/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/api/v1/hotel/product-submission", productSubmissionRoutes);
@@ -195,8 +191,7 @@ app.get('*', (req, res) => {
   return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-<<<<<<< HEAD
-app.use("/construction/Invoice",constructionInvoiceRoutes);
+/* app.use("/construction/Invoice",constructionInvoiceRoutes);
 app.use("/construction/Payment",constructionPaymentRoutes);
 app.use("/construction/Project",constructionProjectRoutes);
 app.use("/construction/Report",constructionReportRoutes);
@@ -225,13 +220,8 @@ app.use("/construction/PayrollCons",PayrollCons);
 
 // Define Port
 const PORT = process.env.PORT || 5000;
-=======
-// app.get("/", (req, res) => {
-//   res.send("Welcome to the Hotel Management API");
-// });
->>>>>>> 886543035ca2c78617358a0d2a11d9e597764df2
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-});
+}); */
