@@ -112,7 +112,39 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
+<<<<<<< HEAD
+
+//construction
+const roleRoutes = require('./routes/roleRoutes');
+const configurationRoutes = require('./routes/configurationRoutes');
+const employeeRoutes = require("./routes/employeeRoutes")
+// const reportRoutes = require('./routes/reportRoutes');
+// const salesRoutes = require('./routes/salesRoutes');
+// const ClientRoutes = require("./routes/ClientRoutes")
+// const reportRoutes = require('./routes/reportRoutes'); 
+// const salesRoutes = require('./routes/salesRoutes');   
+// const ClientRoutes = require("./routes/ClientRoutes")   
+const constructionClientRoutes = require("./routes/constructionClientRoutes");
+const constructionIndex = require("./routes/constructionIndex");
+const constructionInvoiceRoutes = require("./routes/constructionInvoiceRoutes");
+const constructionPaymentRoutes = require("./routes/constructionPaymentRoutes");
+const constructionProjectRoutes = require("./routes/constructionProjectRoutes");
+const constructionReportRoutes = require("./routes/constructionReportRoutes");
+const constructionSettingsRoutes = require("./routes/constructionSettingsRoutes");
+const leaveRoutes = require("./routes/leaveRoutes")
+const attendanceRoutes = require ("./routes/attendanceRoutes")
+const poRoutes = require ("./routes/poRoutes");
+const Vendor = require ("./routes/vendorRoutes");
+const PurchaseCons = require("./routes/purchaseConsRoutes");
+const constructionWorkOrderRoutes = require("./routes/constructionSettingsRoutes");     
+const attendanceConsRoutes = require ("./routes/attendanceRoutesConstruction")
+const supervisorExpenseRoutes = require("./routes/supervisorexpenseRoutes");
+const PayslipCons = require ("./routes/payslipRoutes")
+const PayrollCons = require ("./routes/payrollRoutesConstruction")
+
+=======
 const attendanceRoutes = require("./routes/attendanceRoutes");
+>>>>>>> 886543035ca2c78617358a0d2a11d9e597764df2
 
 // hotel Routes
 app.use("/api/v1/hotel/user-auth", userRoutes);
@@ -163,9 +195,41 @@ app.get('*', (req, res) => {
   return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
+<<<<<<< HEAD
+app.use("/construction/Invoice",constructionInvoiceRoutes);
+app.use("/construction/Payment",constructionPaymentRoutes);
+app.use("/construction/Project",constructionProjectRoutes);
+app.use("/construction/Report",constructionReportRoutes);
+app.use("/construction/Settings",constructionSettingsRoutes);
+app.use("/costruction/po", poRoutes);
+app.use("/costruction/vendor",Vendor);
+app.use("/construction/purchaseCons",PurchaseCons);
+app.use("/construction/attendanceCons", attendanceConsRoutes)
+app.use("/construction/payslipcons",PayslipCons);
+
+
+
+
+
+app.use("/construction/work-orders", constructionWorkOrderRoutes)
+
+app.use("/construction/construction-Invoice",constructionInvoiceRoutes);
+app.use("/construction/construction-Payment",constructionPaymentRoutes);
+app.use("/construction/construction-Project",constructionProjectRoutes);
+app.use("/construction/construction-Report",constructionReportRoutes);
+app.use("/construction/construction-Settings", constructionSettingsRoutes); 
+app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
+app.use("/construction/PayrollCons",PayrollCons);
+
+
+
+// Define Port
+const PORT = process.env.PORT || 5000;
+=======
 // app.get("/", (req, res) => {
 //   res.send("Welcome to the Hotel Management API");
 // });
+>>>>>>> 886543035ca2c78617358a0d2a11d9e597764df2
 
 // Start the server
 app.listen(PORT, () => {
