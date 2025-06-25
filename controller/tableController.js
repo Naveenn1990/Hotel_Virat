@@ -3,6 +3,7 @@ const Branch = require('../model/Branch');
 const asyncHandler = require('express-async-handler');
 const fs = require('fs');
 const path = require('path');
+const { uploadFile2, deleteFile } = require('../middleware/AWS');
 
 const createTable = asyncHandler(async (req, res) => {
   if (!req.body) {
@@ -11,7 +12,7 @@ const createTable = asyncHandler(async (req, res) => {
   }
 
   const { branchId, number, status } = req.body;
-  const image = req.file ? req.file.path : null;
+  const image = req.file ? await uploadFile2(req.file,'table') : null;
 
   if (!branchId || !number) {
     res.status(400);
@@ -62,13 +63,11 @@ const updateTable = asyncHandler(async (req, res) => {
   );
 
   if (req.file) {
-    updateData.image = req.file.path;
+    updateData.image = await uploadFile2(req.file, 'table');
 
     const table = await Table.findById(req.params.id);
     if (table && table.image) {
-      fs.unlink(path.join(__dirname, '..', table.image), (err) => {
-        if (err) console.error('Error deleting old image:', err);
-      });
+       deleteFile(table.image);
     }
   }
 
@@ -102,9 +101,7 @@ const deleteTable = asyncHandler(async (req, res) => {
   }
 
   if (table.image) {
-    fs.unlink(path.join(__dirname, '..', table.image), (err) => {
-      if (err) console.error('Error deleting image:', err);
-    });
+  deleteFile(table.image);
   }
 
   await Table.deleteOne({ _id: req.params.id });

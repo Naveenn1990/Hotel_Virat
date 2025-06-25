@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const fs = require('fs');
-const path = require('path');
-const axios = require('axios');
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,54 +18,65 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS for all routes 
-app.use(cors());
+// Enable CORS for all routes
+app.use(cors({ origin: ['http://localhost:5173', 'https://hotelvirat.s3.amazonaws.com','https://hotelvirat.com'] })); // Vite dev aur production
 
 // Define the rate limiter
-const limiter = rateLimit({ 
+const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs 
-  message: "Too many requests from this IP, please try again after 15 minutes"
+  max: 500, // Limit each IP to 500 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes",
 });
 
 app.use(limiter);
 
 // Use morgan for logging
-app.use(morgan('dev'));          
-app.use(helmet({
-    contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-            "img-src": ["'self'", "data:", "http://localhost:3000", "http://localhost:3001"],
-        }
-    },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-}));
+app.use(morgan("dev"));
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       useDefaults: true,
+//       directives: {
+//         "img-src": [
+//           "'self'",
+//           "data:",
+//           "http://localhost:3000",
+//           "http://localhost:5173",
+//           "https://hotelvirat.com",
+//           "https://hotelvirat.s3.amazonaws.com"
+    
+//         ],
+//       },
+//     },
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//   })
+// );
 
 // Create upload directories if they don't exist
-const createDirIfNotExists = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Directory created: ${dirPath}`);
-  }
-};
+// const createDirIfNotExists = (dirPath) => {
+//   if (!fs.existsSync(dirPath)) {
+//     fs.mkdirSync(dirPath, { recursive: true });
+//     console.log(`Directory created: ${dirPath}`);
+//   }
+// };
 
-createDirIfNotExists('uploads');
-createDirIfNotExists('uploads/profile');
-createDirIfNotExists('uploads/category');
-createDirIfNotExists('uploads/menu');
-createDirIfNotExists("uploads/offer");
+// createDirIfNotExists("uploads");
+// createDirIfNotExists("uploads/profile");
+// createDirIfNotExists("uploads/category");
+// createDirIfNotExists("uploads/menu");
+// createDirIfNotExists("uploads/offer");
 
-// Serve static files from the "uploads" directory 
-app.use("/uploads", express.static("uploads"));
+// Serve static files from the "uploads" directory
+// app.use("/uploads", express.static("uploads"));
 
 // MongoDB Connection
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch((err) => console.log("Error: ", err));
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("Error: ", err));
 
 // Use Routes
+
 const userRoutes = require("./routes/userRoutes");
 const branchRoutes = require("./routes/branchRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -88,7 +99,7 @@ const staffOrderRoutes = require("./routes/staffOrderRoutes");
 const counterOrderRoutes = require("./routes/counterOrderRoutes");
 const counterBillRoutes = require("./routes/counterBillRoutes");
 const staffInvoiceRoutes = require("./routes/staffInvoiceRoutes");
-const recipeRoutes = require("./routes/recipeRoutes"); 
+const recipeRoutes = require("./routes/recipeRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
@@ -101,60 +112,62 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
-const roleRoutes = require('./routes/roleRoutes');
-const configurationRoutes = require('./routes/configurationRoutes');
-const reportRoutes = require('./routes/reportRoutes');
+const attendanceRoutes = require("./routes/attendanceRoutes");
 
+// hotel Routes
+app.use("/api/v1/hotel/user-auth", userRoutes);
+app.use("/api/v1/hotel/branch", branchRoutes);
+app.use("/api/v1/hotel/category", categoryRoutes);
+app.use("/api/v1/hotel/menu", menuRoutes);
+app.use("/api/v1/hotel/cart", cartRoutes);
+app.use("/api/v1/hotel/order", orderRoutes);
+app.use("/api/v1/hotel/coupon", couponRoutes);
+app.use("/api/v1/hotel/about-us", aboutUsRoutes);
+app.use("/api/v1/hotel/help-support", helpSupportRoutes);
+app.use("/api/v1/hotel/terms", termsRoutes);
+app.use("/api/v1/hotel/address", addressRoutes);
+app.use("/api/v1/hotel/admin-auth", adminRoutes);
+app.use("/api/v1/hotel/counter-auth", counterLoginRoutes);
+app.use("/api/v1/hotel/customer-details", customerDetailsRoutes);
+app.use("/api/v1/hotel/counter-invoice", counterInvoiceRoutes);
+app.use("/api/v1/hotel/staff-auth", staffLoginRoutes);
+app.use("/api/v1/hotel/table", tableRoutes);
+app.use("/api/v1/hotel/people-selection", peopleSelectionRoutes);
+app.use("/api/v1/hotel/staff-order", staffOrderRoutes);
+app.use("/api/v1/hotel/counter-order", counterOrderRoutes);
+app.use("/api/v1/hotel/counter-bill", counterBillRoutes);
+app.use("/api/v1/hotel/staff-invoice", staffInvoiceRoutes);
+app.use("/api/v1/hotel/raw-materials", RawMaterial);
+app.use("/api/v1/hotel/recipes", recipeRoutes);
+app.use("/api/v1/hotel/customer", customerRoutes);
+app.use("/api/v1/hotel/supplier", supplierRoutes);
+app.use("/api/v1/hotel/purchase", purchaseRoutes);
+app.use("/api/v1/hotel/raw-material", rawMaterialRoutes);
+app.use("/api/v1/hotel/grn", goodsReceiptNoteRoutes);
+app.use("/api/v1/hotel/reservation", reservationRoutes);
+app.use("/api/v1/hotel/expense", expenseRoutes);
+app.use("/api/v1/hotel/attendance", attendanceRoutes);
 
-app.use("/hotel/user-auth", userRoutes);
-app.use("/hotel/branch", branchRoutes);
-app.use("/hotel/category", categoryRoutes);
-app.use("/hotel/menu", menuRoutes);
-app.use("/hotel/cart", cartRoutes);
-app.use("/hotel/order", orderRoutes);
-app.use("/hotel/coupon", couponRoutes);
-app.use("/hotel/about-us", aboutUsRoutes);
-app.use("/hotel/help-support", helpSupportRoutes);
-app.use("/hotel/terms", termsRoutes);
-app.use("/hotel/address", addressRoutes);
-app.use("/hotel/admin-auth", adminRoutes);
-app.use("/hotel/counter-auth", counterLoginRoutes);
-app.use("/hotel/customer-details", customerDetailsRoutes);
-app.use("/hotel/counter-invoice", counterInvoiceRoutes);
-app.use("/hotel/staff-auth", staffLoginRoutes);
-app.use("/hotel/table", tableRoutes);
-app.use("/hotel/people-selection", peopleSelectionRoutes);
-app.use("/hotel/staff-order", staffOrderRoutes);
-app.use("/hotel/counter-order", counterOrderRoutes);
-app.use("/hotel/counter-bill", counterBillRoutes);
-app.use("/hotel/staff-invoice", staffInvoiceRoutes);
-app.use("/hotel/raw-materials",RawMaterial)
-app.use("/hotel/recipes", recipeRoutes); 
-app.use("/hotel/customer", customerRoutes);
-app.use("/hotel/supplier", supplierRoutes);
-app.use("/hotel/purchase", purchaseRoutes);
-app.use("/hotel/raw-material", rawMaterialRoutes);
-app.use("/hotel/grn", goodsReceiptNoteRoutes);
-app.use("/hotel/reservation", reservationRoutes);
-app.use("/hotel/expense", expenseRoutes);
- 
+app.use("/api/v1/hotel/purchase-user-auth", purchaseUserRoutes);
+app.use("/api/v1/hotel/product-submission", productSubmissionRoutes);
+app.use("/api/v1/hotel/stock", stockRoutes);
+app.use("/api/v1/hotel/store-location", storeLocationRoutes);
 
+const PORT = process.env.PORT || 9000;
 
-// app.use("/hotel/pending", pendingRoutes);
+app.use(express.static(path.join(__dirname, 'build'))); // Change 'dist' to your frontend folder if needed
 
-app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
-app.use("/hotel/product-submission", productSubmissionRoutes);
-app.use("/hotel/stock", stockRoutes);
-app.use("/hotel/store-location", storeLocationRoutes);
-app.use('/config/roles', roleRoutes);
-app.use("/config/configuration", configurationRoutes);
-app.use("/report", reportRoutes);
- 
+// Redirect all requests to the index.html file
+// 
+app.get('*', (req, res) => {
+  return res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
-// Define Port
-const PORT = process.env.PORT || 5000;
+// app.get("/", (req, res) => {
+//   res.send("Welcome to the Hotel Management API");
+// });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});   
+  console.log(`Server running on http://localhost:${PORT}`);
+});

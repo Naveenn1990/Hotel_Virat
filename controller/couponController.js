@@ -2,6 +2,7 @@ const Coupon = require("../model/couponModel");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const { uploadFile2, deleteFile } = require("../middleware/AWS");
 
 // Create a new coupon
 exports.createCoupon = async (req, res) => {
@@ -22,7 +23,7 @@ exports.createCoupon = async (req, res) => {
       oneTimePerUser,
     } = req.body;
 
-    const image = req.file ? req.file.path : null;
+    const image = req.file ? await uploadFile2(req.file,"coupon") : null;
 
     if (!code || !description || !discountValue || !endDate) {
       return res.status(400).json({
@@ -163,12 +164,10 @@ exports.updateCoupon = async (req, res) => {
 
     // If a new image is uploaded, update the image path and delete the old image
     if (req.file) {
-      updateData.image = req.file.path;
+      updateData.image = req.file ? await uploadFile2(req.file, "coupon") : null;
       const coupon = await Coupon.findById(id);
       if (coupon && coupon.image) {
-        fs.unlink(path.join(__dirname, "..", coupon.image), (err) => {
-          if (err) console.error("Error deleting old image:", err);
-        });
+       await deleteFile(coupon.image);
       }
     }
 
@@ -199,9 +198,7 @@ exports.deleteCoupon = async (req, res) => {
 
     // Delete the associated image file
     if (coupon.image) {
-      fs.unlink(path.join(__dirname, "..", coupon.image), (err) => {
-        if (err) console.error("Error deleting image:", err);
-      });
+     await deleteFile(coupon.image);
     }
 
     await Coupon.findByIdAndDelete(id);

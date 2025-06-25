@@ -1,6 +1,7 @@
 const Menu = require('../model/menuModel');
 const fs = require('fs');
 const path = require('path');
+const { uploadFile2, deleteFile } = require('../middleware/AWS');
 
 // Create a new menu item
 exports.createMenuItem = async (req, res) => {
@@ -12,8 +13,8 @@ exports.createMenuItem = async (req, res) => {
       categoryId, 
       branchId
     } = req.body;
-    
-    const image = req.file ? req.file.path : null;
+
+    const image = req.file ? await uploadFile2(req.file, 'menu') : null;
 
     const menuItem = new Menu({
       name,
@@ -92,14 +93,12 @@ exports.updateMenuItem = async (req, res) => {
 
     // If a new image is uploaded, update the image path and delete the old image
     if (req.file) {
-      updateData.image = req.file.path;
+      updateData.image = await uploadFile2(req.file, 'menu');
 
       // Find the menu item to get the old image path
       const menuItem = await Menu.findById(req.params.id);
       if (menuItem && menuItem.image) {
-        fs.unlink(path.join(__dirname, '..', menuItem.image), (err) => {
-          if (err) console.error('Error deleting old image:', err);
-        });
+       deleteFile(menuItem.image);
       }
     }
 
@@ -128,9 +127,7 @@ exports.deleteMenuItem = async (req, res) => {
 
     // Delete the associated image file
     if (menuItem.image) {
-      fs.unlink(path.join(__dirname, '..', menuItem.image), (err) => {
-        if (err) console.error('Error deleting image:', err);
-      });
+      deleteFile(menuItem.image);
     }
 
     await Menu.findByIdAndDelete(req.params.id);
