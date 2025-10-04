@@ -1,12 +1,13 @@
 const express = require("express")
 const router = express.Router()
 const staffOrderController = require("../controller/staffOrderController")
+const { validateStock, updateStockAfterOrder, restoreStockOnCancellation } = require("../middleware/stockMiddleware")
 
 // Create staff order after payment success (EXISTING)
-router.post("/create-after-payment", staffOrderController.createStaffOrderAfterPayment)
+router.post("/create-after-payment", validateStock, staffOrderController.createStaffOrderAfterPayment, updateStockAfterOrder)
 
 // NEW: Create guest order
-router.post("/create-guest-order", staffOrderController.createGuestOrder)
+router.post("/create-guest-order", validateStock, staffOrderController.createGuestOrder, updateStockAfterOrder)
 
 // Get orders by userId - EXISTING (must be before /:id route)
 router.get("/user/:userId", staffOrderController.getOrdersByUserId)

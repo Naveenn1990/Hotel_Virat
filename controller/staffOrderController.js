@@ -140,6 +140,9 @@ exports.createStaffOrderAfterPayment = async (req, res) => {
     const staffOrder = new StaffOrder(orderData)
     await staffOrder.save()
 
+    // Set orderId for stock updates
+    req.orderId = staffOrder._id
+
     console.log("Staff order created successfully for user:", userId, "Order ID:", staffOrder.orderId)
 
     res.status(201).json({
@@ -288,6 +291,9 @@ exports.createGuestOrder = async (req, res) => {
     })
 
     await guestOrder.save()
+
+    // Set orderId for stock updates
+    req.orderId = guestOrder._id
 
     console.log("Guest order created successfully:", guestOrder.orderId)
 

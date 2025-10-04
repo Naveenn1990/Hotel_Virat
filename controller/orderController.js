@@ -3,9 +3,14 @@ const Order = require("../model/orderModel")
 const Cart = require("../model/cartModel")
 const User = require("../model/userModel")
 const Branch = require("../model/Branch")
+const { validateStock, updateStockAfterOrder } = require("../middleware/stockMiddleware")
 
 // Create a new order
-exports.createOrder = async (req, res) => {
+exports.createOrder = async (req, res, next) => {
+  console.log('🚀 ORDER CONTROLLER: createOrder called');
+  console.log('📦 Request body:', req.body);
+  console.log('📦 Stock updates from middleware:', req.stockUpdates);
+  
   try {
     const {
       userId,
@@ -80,6 +85,9 @@ exports.createOrder = async (req, res) => {
     // Save the order
     await order.save()
 
+    // Set orderId for stock updates
+    req.orderId = order._id;
+
     // Log the query parameters for debugging
     console.log(`Searching for cart with userId: ${userId}, branchId: ${branchId}`)
 
@@ -111,11 +119,13 @@ exports.createOrder = async (req, res) => {
     await cart.save()
     console.log(`Cart cleared for userId: ${userId}, branchId: ${branchId}`)
 
-    res.status(201).json({
+    // Don't send response here - let the stock update middleware handle it
+    req.orderResponse = {
       message: "Order created successfully, cart cleared",
       order,
       orderNumber: order.orderNumber,
-    })
+    }
+    next()
   } catch (error) {
     console.error("Error in createOrder:", error)
     res.status(500).json({ message: "Error creating order", error: error.message })

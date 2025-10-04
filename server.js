@@ -18,8 +18,16 @@ const app = express();
 // Middleware to parse JSON
 app.use(express.json());
 
-// Enable CORS for all routes
-app.use(cors({ origin: ['http://localhost:5173', 'https://hotelvirat.s3.amazonaws.com','https://hotelvirat.com'] })); // Vite dev aur production
+// Middleware to parse URL-encoded data
+app.use(express.urlencoded({ extended: true }));
+
+// Enable CORS for all routes - Allow all origins for React Native development
+app.use(cors({ 
+  origin: true, // Allow all origins for React Native
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+})); // Vite dev aur production
 
 // Define the rate limiter
 const limiter = rateLimit({
@@ -70,8 +78,10 @@ app.use(morgan("dev"));
 // app.use("/uploads", express.static("uploads"));
 
 // MongoDB Connection
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://hotelvirat:zR4WlMNuRO3ZB60x@cluster0.vyfwyjl.mongodb.net/HotelVirat';
+console.log('Connecting to MongoDB:', mongoURI);
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoURI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("Error: ", err));
 
@@ -112,6 +122,10 @@ const purchaseUserRoutes = require("./routes/purchaseUserRoutes");
 const productSubmissionRoutes = require("./routes/productSubmissionRoutes");
 const stockRoutes = require("./routes/stockInwardRoutes");
 const storeLocationRoutes = require("./routes/storeLocationRoutes");
+const inventoryRoutes = require("./routes/inventoryRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const subscriptionOrderRoutes = require("./routes/subscriptionOrderRoutes");
+const mealOfTheDayRoutes = require("./routes/mealOfTheDayRoutes");
 
 //construction
 /* const roleRoutes = require('./routes/roleRoutes');
@@ -180,53 +194,28 @@ app.use("/api/v1/hotel/purchase-user-auth", purchaseUserRoutes);
 app.use("/api/v1/hotel/product-submission", productSubmissionRoutes);
 app.use("/api/v1/hotel/stock", stockRoutes);
 app.use("/api/v1/hotel/store-location", storeLocationRoutes);
+app.use("/api/v1/hotel/inventory", inventoryRoutes);
+app.use("/api/v1/hotel/subscription", subscriptionRoutes);
+app.use("/api/v1/hotel/subscription-order", subscriptionOrderRoutes);
+app.use("/api/v1/hotel/meal-of-the-day", mealOfTheDayRoutes);
 
-const PORT = process.env.PORT || 9000;
-
-app.use(express.static(path.join(__dirname, 'build'))); // Change 'dist' to your frontend folder if needed
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Redirect all requests to the index.html file
-// 
 app.get('*', (req, res) => {
   return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-/* app.use("/construction/Invoice",constructionInvoiceRoutes);
-app.use("/construction/Payment",constructionPaymentRoutes);
-app.use("/construction/Project",constructionProjectRoutes);
-app.use("/construction/Report",constructionReportRoutes);
-app.use("/construction/Settings",constructionSettingsRoutes);
-app.use("/costruction/po", poRoutes);
-app.use("/costruction/vendor",Vendor);
-app.use("/construction/purchaseCons",PurchaseCons);
-app.use("/construction/attendanceCons", attendanceConsRoutes)
-app.use("/construction/payslipcons",PayslipCons);
 
 
 
-
-
-app.use("/construction/work-orders", constructionWorkOrderRoutes)
-
-app.use("/construction/construction-Invoice",constructionInvoiceRoutes);
-app.use("/construction/construction-Payment",constructionPaymentRoutes);
-app.use("/construction/construction-Project",constructionProjectRoutes);
-app.use("/construction/construction-Report",constructionReportRoutes);
-app.use("/construction/construction-Settings", constructionSettingsRoutes); 
-app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
-app.use("/construction/PayrollCons",PayrollCons);
 
 
 
 // Define Port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9000;
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-}); */
-
-
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

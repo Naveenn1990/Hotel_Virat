@@ -1,448 +1,309 @@
-const { LocationInventory, StockTransaction } = require("../model/inventoryModel")
-const RawMaterial = require("../model/rawMaterialModel")
-const StoreLocation = require("../model/storeLocationModel")
-const mongoose = require("mongoose")
-const Recipe = require("../model/recipe") // Ensure Recipe model is imported
+const asyncHandler = require('express-async-handler');
+const Menu = require('../model/menuModel');
+const StockHistory = require('../model/stockHistoryModel');
+const Branch = require('../model/Branch');
+const Order = require('../model/orderModel');
 
-// Get inventory for a specific location
-exports.getLocationInventory = async (req, res) => {
-  try {
-    const { locationId } = req.params
-    const { search, category, status } = req.query
+// @desc    Get inventory for a specific branch
+// @route   GET /api/v1/hotel/inventory/:branchId
+// @access  Private
+const getInventoryByBranch = asyncHandler(async (req, res) => {
+  const { branchId } = req.params;
+  const { categoryId, status, lowStock } = req.query;
 
-    // Validate locationId
-    if (!mongoose.Types.ObjectId.isValid(locationId)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Invalid location ID format" 
-      })
-    }
+  // Build filter object
+  let filter = { branchId };
 
-    // Check if location exists
-    const location = await StoreLocation.findById(locationId)
-    if (!location) {
-      return res.status(404).json({ 
-        success: false, 
-        error: "Store location not found" 
-      })
-    }
-
-    // Build aggregation pipeline
-    const pipeline = [
-      {
-        $match: { locationId: new mongoose.Types.ObjectId(locationId) },
-      },
-      {
-        $lookup: {
-          from: "rawmaterials",
-          localField: "rawMaterialId",
-          foreignField: "_id",
-          as: "material",
-        },
-      },
-      {
-        $unwind: "$material",
-      },
-    ]
-
-    // Add search filter
-    if (search) {
-      pipeline.push({
-        $match: {
-          $or: [
-            { "material.name": { $regex: search, $options: "i" } },
-            { "material.description": { $regex: search, $options: "i" } },
-          ],
-        },
-      })
-    }
-
-    // Add category filter
-    if (category && category !== "all") {
-      pipeline.push({
-        $match: { "material.category": category },
-      })
-    }
-
-    // Add status calculation and filter
-    pipeline.push({
-      $addFields: {
-        status: {
-          $cond: {
-            if: { $eq: ["$quantity", 0] },
-            then: "Out of Stock",
-            else: {
-              $cond: {
-                if: { $lte: ["$quantity", "$material.minLevel"] },
-                then: "Low Stock",
-                else: "In Stock",
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (status && status !== "all") {
-      pipeline.push({
-        $match: { status: status },
-      })
-    }
-
-    const inventory = await LocationInventory.aggregate(pipeline)
-
-    res.json({
-      success: true,
-      data: inventory.map((item) => ({
-        _id: item._id,
-        name: item.material.name,
-        category: item.material.category,
-        unit: item.material.unit,
-        quantity: item.quantity,
-        costPrice: item.costPrice,
-        price: item.material.price,
-        minLevel: item.material.minLevel,
-        status: item.status,
-        expiryDate: item.expiryDate,
-        batchNumber: item.batchNumber,
-        description: item.material.description,
-        supplier: item.material.supplier,
-        lastUpdated: item.lastUpdated,
-      })),
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+  if (categoryId) {
+    filter.categoryId = categoryId;
   }
-}
 
-// Add raw material to location inventory
-exports.addToLocationInventory = async (req, res) => {
-  try {
-    const { locationId } = req.params
-    const { rawMaterialId, quantity, costPrice, expiryDate, batchNumber } = req.body
-
-    // Validate location and raw material exist
-    const location = await StoreLocation.findById(locationId)
-    if (!location) {
-      return res.status(404).json({ error: "Store location not found" })
-    }
-
-    const rawMaterial = await RawMaterial.findById(rawMaterialId)
-    if (!rawMaterial) {
-      return res.status(404).json({ error: "Raw material not found" })
-    }
-
-    // Check if inventory item already exists
-    let inventoryItem = await LocationInventory.findOne({
-      locationId,
-      rawMaterialId,
-    })
-
-    if (inventoryItem) {
-      // Update existing inventory
-      inventoryItem.quantity += Number.parseFloat(quantity)
-      inventoryItem.costPrice = costPrice || inventoryItem.costPrice
-      if (expiryDate) inventoryItem.expiryDate = expiryDate
-      if (batchNumber) inventoryItem.batchNumber = batchNumber
-      inventoryItem.lastUpdated = new Date()
-      await inventoryItem.save()
-    } else {
-      // Create new inventory item
-      inventoryItem = new LocationInventory({
-        locationId,
-        rawMaterialId,
-        quantity: Number.parseFloat(quantity),
-        costPrice: costPrice || rawMaterial.price,
-        expiryDate,
-        batchNumber,
-      })
-      await inventoryItem.save()
-    }
-
-    // Create stock transaction record
-    const transaction = new StockTransaction({
-      type: "inward",
-      locationId,
-      rawMaterialId,
-      quantity: Number.parseFloat(quantity),
-      costPrice: costPrice || rawMaterial.price,
-      reference: `INV-${Date.now()}`,
-      source: "Manual Entry",
-      expiryDate,
-      batchNumber,
-      userId: req.user?.id,
-    })
-    await transaction.save()
-
-    // Update main raw material stock
-    rawMaterial.quantity += Number.parseFloat(quantity)
-    await rawMaterial.save()
-
-    res.json({
-      success: true,
-      message: "Raw material added to inventory successfully",
-      data: inventoryItem,
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+  if (status === 'out_of_stock') {
+    filter.stock = { $lte: 0 };
+  } else if (status === 'low_stock') {
+    filter.stock = { $gt: 0, $lte: 5 }; // Assuming lowStockAlert default is 5
   }
-}
 
-// Deduct stock from location inventory
-exports.deductFromLocationInventory = async (req, res) => {
-  try {
-    const { locationId } = req.params
-    const { rawMaterialId, quantity, reference, destination } = req.body
-
-    const inventoryItem = await LocationInventory.findOne({
-      locationId,
-      rawMaterialId,
-    })
-
-    if (!inventoryItem) {
-      return res.status(404).json({ error: "Item not found in location inventory" })
-    }
-
-    if (inventoryItem.quantity < quantity) {
-      return res.status(400).json({ error: "Insufficient stock" })
-    }
-
-    // Deduct from location inventory
-    inventoryItem.quantity -= Number.parseFloat(quantity)
-    inventoryItem.lastUpdated = new Date()
-    await inventoryItem.save()
-
-    // Create stock transaction record
-    const transaction = new StockTransaction({
-      type: "outward",
-      locationId,
-      rawMaterialId,
-      quantity: Number.parseFloat(quantity),
-      costPrice: inventoryItem.costPrice,
-      reference: reference || `OUT-${Date.now()}`,
-      destination: destination || "Recipe Usage",
-      userId: req.user?.id,
-    })
-    await transaction.save()
-
-    // Update main raw material stock
-    const rawMaterial = await RawMaterial.findById(rawMaterialId)
-    if (rawMaterial) {
-      rawMaterial.quantity = Math.max(0, rawMaterial.quantity - Number.parseFloat(quantity))
-      await rawMaterial.save()
-    }
-
-    res.json({
-      success: true,
-      message: "Stock deducted successfully",
-      data: inventoryItem,
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+  if (lowStock === 'true') {
+    filter.$expr = {
+      $lte: ['$stock', '$lowStockAlert']
+    };
   }
-}
 
-// Get stock transactions
-exports.getStockTransactions = async (req, res) => {
+  const inventory = await Menu.find(filter)
+    .populate('categoryId', 'name')
+    .populate('branchId', 'name')
+    .sort({ name: 1 });
+
+  res.status(200).json({
+    success: true,
+    data: inventory,
+    count: inventory.length
+  });
+});
+
+// @desc    Update stock for a single product
+// @route   PUT /api/v1/hotel/inventory/update/:productId
+// @access  Private
+const updateProductStock = asyncHandler(async (req, res) => {
   try {
-    const { type, locationId, startDate, endDate } = req.query
+    const { productId } = req.params;
+    const { stock, changeType, notes } = req.body;
+    const updatedBy = req.user?.id || req.admin?.id || 'system';
 
-    const filter = {}
-    if (type && type !== "all") filter.type = type
-    if (locationId) filter.locationId = locationId
-    if (startDate || endDate) {
-      filter.createdAt = {}
-      if (startDate) filter.createdAt.$gte = new Date(startDate)
-      if (endDate) filter.createdAt.$lte = new Date(endDate)
+    if (!stock && stock !== 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Stock value is required'
+      });
     }
 
-    const transactions = await StockTransaction.find(filter)
-      .populate("locationId", "name")
-      .populate("rawMaterialId", "name unit")
-      .sort({ createdAt: -1 })
-      .limit(100)
+    const product = await Menu.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
 
-    res.json({
+    const oldStock = product.stock;
+    const newStock = parseInt(stock);
+
+    if (newStock < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Stock cannot be negative'
+      });
+    }
+
+    // Update product stock
+    product.stock = newStock;
+    product.isActive = newStock > 0;
+    await product.save();
+
+    // Log stock history (only if StockHistory model exists)
+    try {
+      await StockHistory.create({
+        productId: product._id,
+        branchId: product.branchId,
+        updatedBy,
+        oldStock,
+        newStock,
+        changeType: changeType || 'manual',
+        quantity: Math.abs(newStock - oldStock),
+        notes
+      });
+    } catch (historyError) {
+      console.log('Stock history logging failed:', historyError.message);
+      // Continue without failing the main operation
+    }
+
+    res.status(200).json({
       success: true,
-      data: transactions,
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+      message: 'Stock updated successfully',
+      data: {
+        productId: product._id,
+        oldStock,
+        newStock,
+        isActive: product.isActive
+      }
+    });
+  } catch (error) {
+    console.error('Error updating stock:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
   }
-}
+});
 
-// Deduct stock based on recipe
-exports.deductStockByRecipe = async (req, res) => {
+// @desc    Bulk update stock for multiple products
+// @route   PUT /api/v1/hotel/inventory/bulk-update
+// @access  Private
+const bulkUpdateStock = asyncHandler(async (req, res) => {
   try {
-    const { recipeId, locationId, quantity } = req.body
+    const { products } = req.body;
+    const updatedBy = req.user?.id || req.admin?.id || 'system';
 
-    // Get recipe details
-    const recipe = await Recipe.findById(recipeId).populate("ingredients.rawMaterialId", "name unit price minLevel")
-    if (!recipe) {
-      return res.status(404).json({ success: false, error: "Recipe not found" })
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Products array is required'
+      });
     }
 
-    // Check if location exists
-    const location = await StoreLocation.findById(locationId)
-    if (!location) {
-      return res.status(404).json({ success: false, error: "Location not found" })
-    }
+    const results = [];
+    const errors = [];
 
-    // Check stock availability for all ingredients
-    const insufficientStock = []
-    const lowStockWarnings = []
+    for (const item of products) {
+      try {
+        const { productId, stock, changeType, notes } = item;
 
-    for (const ingredient of recipe.ingredients) {
-      const inventoryItem = await LocationInventory.findOne({
-        locationId,
-        rawMaterialId: ingredient.rawMaterialId._id,
-      })
+        if (!productId || (stock === undefined || stock === null)) {
+          errors.push({
+            productId,
+            error: 'Product ID and stock are required'
+          });
+          continue;
+        }
 
-      const requiredQuantity = ingredient.quantity * quantity
+        const product = await Menu.findById(productId);
+        if (!product) {
+          errors.push({
+            productId,
+            error: 'Product not found'
+          });
+          continue;
+        }
 
-      if (!inventoryItem || inventoryItem.quantity < requiredQuantity) {
-        insufficientStock.push({
-          material: ingredient.rawMaterialId.name,
-          required: requiredQuantity,
-          available: inventoryItem ? inventoryItem.quantity : 0,
-          unit: ingredient.unit || ingredient.rawMaterialId.unit,
-        })
-      } else if (inventoryItem.quantity - requiredQuantity < ingredient.rawMaterialId.minLevel) {
-        lowStockWarnings.push({
-          material: ingredient.rawMaterialId.name,
-          currentStock: inventoryItem.quantity,
-          afterDeduction: inventoryItem.quantity - requiredQuantity,
-          minLevel: ingredient.rawMaterialId.minLevel,
-          unit: ingredient.unit || ingredient.rawMaterialId.unit,
-        })
+        const oldStock = product.stock;
+        const newStock = parseInt(stock);
+
+        if (newStock < 0) {
+          errors.push({
+            productId,
+            error: 'Stock cannot be negative'
+          });
+          continue;
+        }
+
+        // Update product stock
+        product.stock = newStock;
+        product.isActive = newStock > 0;
+        await product.save();
+
+        // Log stock history (only if StockHistory model exists)
+        try {
+          await StockHistory.create({
+            productId: product._id,
+            branchId: product.branchId,
+            updatedBy,
+            oldStock,
+            newStock,
+            changeType: changeType || 'bulk_update',
+            quantity: Math.abs(newStock - oldStock),
+            notes
+          });
+        } catch (historyError) {
+          console.log('Stock history logging failed for product:', productId, historyError.message);
+          // Continue without failing the main operation
+        }
+
+        results.push({
+          productId: product._id,
+          oldStock,
+          newStock,
+          isActive: product.isActive
+        });
+      } catch (error) {
+        errors.push({
+          productId: item.productId,
+          error: error.message
+        });
       }
     }
 
-    // If there's insufficient stock, return error
-    if (insufficientStock.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: "Insufficient stock for some ingredients",
-        insufficientItems: insufficientStock,
-      })
-    }
-
-    // Deduct stock for each ingredient
-    const deductions = []
-    const reference = `RECIPE-${recipe.name}-${Date.now()}`
-
-    for (const ingredient of recipe.ingredients) {
-      const requiredQuantity = ingredient.quantity * quantity
-
-      const inventoryItem = await LocationInventory.findOne({
-        locationId,
-        rawMaterialId: ingredient.rawMaterialId._id,
-      })
-
-      // Deduct from location inventory
-      inventoryItem.quantity -= requiredQuantity
-      inventoryItem.lastUpdated = new Date()
-      await inventoryItem.save()
-
-      // Create stock transaction record
-      const transaction = new StockTransaction({
-        type: "outward",
-        locationId,
-        rawMaterialId: ingredient.rawMaterialId._id,
-        quantity: requiredQuantity,
-        costPrice: inventoryItem.costPrice,
-        reference,
-        destination: `Recipe: ${recipe.name}`,
-        userId: req.user?.id,
-      })
-      await transaction.save()
-
-      deductions.push({
-        material: ingredient.rawMaterialId.name,
-        deducted: requiredQuantity,
-        unit: ingredient.unit || ingredient.rawMaterialId.unit,
-      })
-    }
-
-    res.json({
+    res.status(200).json({
       success: true,
-      message: "Stock deducted successfully for recipe",
-      deductions,
-      lowStockWarnings: lowStockWarnings.length > 0 ? lowStockWarnings : null,
-    })
-  } catch (err) {
-    console.error("Error deducting stock by recipe:", err)
-    res.status(500).json({ success: false, error: err.message })
+      message: `Updated ${results.length} products successfully`,
+      data: {
+        updated: results,
+        errors: errors
+      }
+    });
+  } catch (error) {
+    console.error('Error in bulk update:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
   }
-}
+});
 
-// Get low stock alerts
-exports.getLowStockAlerts = async (req, res) => {
-  try {
-    const { locationId } = req.query
+// @desc    Get stock history for a product
+// @route   GET /api/v1/hotel/inventory/history/:productId
+// @access  Private
+const getStockHistory = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
 
-    const pipeline = [
-      {
-        $lookup: {
-          from: "rawmaterials",
-          localField: "rawMaterialId",
-          foreignField: "_id",
-          as: "material",
-        },
-      },
-      {
-        $unwind: "$material",
-      },
-      {
-        $match: {
-          $expr: { $lte: ["$quantity", "$material.minLevel"] },
-        },
-      },
-    ]
+  const history = await StockHistory.find({ productId })
+    .populate('updatedBy', 'name email')
+    .populate('orderId', 'orderNumber')
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
 
-    if (locationId) {
-      pipeline.unshift({
-        $match: { locationId: new mongoose.Types.ObjectId(locationId) },
-      })
+  const total = await StockHistory.countDocuments({ productId });
+
+  res.status(200).json({
+    success: true,
+    data: history,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total,
+      pages: Math.ceil(total / limit)
     }
+  });
+});
 
-    const lowStockItems = await LocationInventory.aggregate(pipeline)
+// @desc    Get low stock products for a branch
+// @route   GET /api/v1/hotel/inventory/low-stock/:branchId
+// @access  Private
+const getLowStockProducts = asyncHandler(async (req, res) => {
+  const { branchId } = req.params;
 
-    res.json({
+  const lowStockProducts = await Menu.find({
+    branchId,
+    $expr: {
+      $lte: ['$stock', '$lowStockAlert']
+    },
+    stock: { $gt: 0 }
+  })
+    .populate('categoryId', 'name')
+    .populate('branchId', 'name')
+    .sort({ stock: 1 });
+
+  res.status(200).json({
       success: true,
-      data: lowStockItems,
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-}
+    data: lowStockProducts,
+    count: lowStockProducts.length
+  });
+});
 
-// Get expiring items
-exports.getExpiringItems = async (req, res) => {
-  try {
-    const { locationId, days = 7 } = req.query
-    const expiryDate = new Date()
-    expiryDate.setDate(expiryDate.getDate() + Number.parseInt(days))
+// @desc    Export inventory to CSV
+// @route   GET /api/v1/hotel/inventory/export/:branchId
+// @access  Private
+const exportInventory = asyncHandler(async (req, res) => {
+  const { branchId } = req.params;
 
-    const filter = {
-      expiryDate: { $lte: expiryDate, $gte: new Date() },
-      quantity: { $gt: 0 },
-    }
+  const inventory = await Menu.find({ branchId })
+    .populate('categoryId', 'name')
+    .populate('branchId', 'name')
+    .sort({ name: 1 });
 
-    if (locationId) {
-      filter.locationId = locationId
-    }
+  // Convert to CSV format
+  const csvHeader = 'Product Name,Category,Branch,Current Stock,Low Stock Alert,Status,Price\n';
+  const csvData = inventory.map(item => {
+    const status = item.stock > 0 ? 'Available' : 'Out of Stock';
+    return `"${item.name}","${item.categoryId?.name || 'N/A'}","${item.branchId?.name || 'N/A'}",${item.stock},${item.lowStockAlert},"${status}",${item.price}`;
+  }).join('\n');
 
-    const expiringItems = await LocationInventory.find(filter)
-      .populate("locationId", "name")
-      .populate("rawMaterialId", "name unit")
-      .sort({ expiryDate: 1 })
+  const csv = csvHeader + csvData;
 
-    res.json({
-      success: true,
-      data: expiringItems,
-    })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-}
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="inventory-${branchId}-${new Date().toISOString().split('T')[0]}.csv"`);
+  res.status(200).send(csv);
+});
+
+module.exports = {
+  getInventoryByBranch,
+  updateProductStock,
+  bulkUpdateStock,
+  getStockHistory,
+  getLowStockProducts,
+  exportInventory
+};

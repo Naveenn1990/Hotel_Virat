@@ -11,8 +11,21 @@ exports.createMenuItem = async (req, res) => {
       description, 
       price, 
       categoryId, 
-      branchId
+      branchId,
+      subscriptionEnabled,
+      subscriptionPlans
     } = req.body;
+
+    // Parse subscriptionPlans if it's a JSON string
+    let parsedSubscriptionPlans = subscriptionPlans;
+    if (typeof subscriptionPlans === 'string') {
+      try {
+        parsedSubscriptionPlans = JSON.parse(subscriptionPlans);
+      } catch (error) {
+        console.error('Error parsing subscriptionPlans:', error);
+        parsedSubscriptionPlans = [];
+      }
+    }
 
     const image = req.file ? await uploadFile2(req.file, 'menu') : null;
 
@@ -22,7 +35,9 @@ exports.createMenuItem = async (req, res) => {
       price,
       categoryId,
       branchId,
-      image
+      image,
+      subscriptionEnabled: subscriptionEnabled || false,
+      subscriptionPlans: parsedSubscriptionPlans || []
     });
 
     await menuItem.save();
@@ -44,6 +59,8 @@ exports.getAllMenuItems = async (req, res) => {
     
     const menuItems = await Menu.find(filter)
       .populate('categoryId', 'name')
+      .populate('branchId', 'name')
+      .select('name description price image categoryId branchId stock lowStockAlert isActive subscriptionEnabled subscriptionPlans')
       .sort({ name: 1 });
       
     res.status(200).json(menuItems);
@@ -56,7 +73,9 @@ exports.getAllMenuItems = async (req, res) => {
 exports.getMenuItemById = async (req, res) => {
   try {
     const menuItem = await Menu.findById(req.params.id)
-      .populate('categoryId', 'name');
+      .populate('categoryId', 'name')
+      .populate('branchId', 'name')
+      .select('name description price image categoryId branchId stock lowStockAlert isActive subscriptionEnabled subscriptionPlans');
       
     if (!menuItem) {
       return res.status(404).json({ message: 'Menu item not found' });
@@ -75,15 +94,30 @@ exports.updateMenuItem = async (req, res) => {
       description, 
       price, 
       categoryId, 
-      branchId
+      branchId,
+      subscriptionEnabled,
+      subscriptionPlans
     } = req.body;
+
+    // Parse subscriptionPlans if it's a JSON string
+    let parsedSubscriptionPlans = subscriptionPlans;
+    if (typeof subscriptionPlans === 'string') {
+      try {
+        parsedSubscriptionPlans = JSON.parse(subscriptionPlans);
+      } catch (error) {
+        console.error('Error parsing subscriptionPlans:', error);
+        parsedSubscriptionPlans = [];
+      }
+    }
     
     const updateData = { 
       name, 
       description, 
       price, 
       categoryId, 
-      branchId
+      branchId,
+      subscriptionEnabled,
+      subscriptionPlans: parsedSubscriptionPlans
     };
 
     // Remove undefined fields

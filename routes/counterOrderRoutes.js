@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const counterOrderController = require("../controller/counterOrderController")
+const { validateStock, updateStockAfterOrder, restoreStockOnCancellation } = require("../middleware/stockMiddleware")
 
 // List all orders - this should come BEFORE the /:id route
 router.get("/orders", counterOrderController.getAllCounterOrders)
@@ -9,7 +10,7 @@ router.get("/orders", counterOrderController.getAllCounterOrders)
 router.get("/orders/user/:userId", counterOrderController.getCounterOrdersByUserId)
 
 // Create a new orderwha
-router.post("/orders", counterOrderController.createCounterOrder)
+router.post("/orders", validateStock, counterOrderController.createCounterOrder, updateStockAfterOrder)
 
 // Get order by ID
 router.get("/orders/:id", counterOrderController.getCounterOrderById)
